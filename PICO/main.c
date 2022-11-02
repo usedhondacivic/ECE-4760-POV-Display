@@ -14,5 +14,5 @@ int main()
 
     ws2812_init(NUM_PIXELS, WS2812_PIN, 0);
 
-    ws2812_pattern_snakes(48, 0);
+    ws2812_pattern_snakes(NUM_PIXELS, 0);
 }
