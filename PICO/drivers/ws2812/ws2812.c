@@ -12,10 +12,6 @@
 #include "hardware/clocks.h"
 #include "ws2812.pio.h"
 
-int NUM_PIXELS = 48;
-int WS2812_PIN = 2;
-int IS_RGBW = 0;
-
 static inline void put_pixel(uint32_t pixel_grb)
 {
     pio_sm_put_blocking(pio0, 0, pixel_grb << 8u);
@@ -84,11 +80,11 @@ const struct
     {pattern_greys, "Greys"},
 };
 
-int main()
+void ws2812_init(int NUM_PIXELS, int WS2812_PIN, int IS_RGBW)
 {
     // set_sys_clock_48();
     stdio_init_all();
-    printf("WS2812 Smoke Test, using pin %d", WS2812_PIN);
+    printf("WS2812 using pin %d", WS2812_PIN);
 
     // todo get free sm
     PIO pio = pio0;
