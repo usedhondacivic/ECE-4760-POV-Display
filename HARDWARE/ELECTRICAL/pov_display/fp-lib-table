@@ -1,0 +1,4 @@
+(fp_lib_table
+  (lib (name "logic_shifter")(type "KiCad")(uri "${KIPRJMOD}/logic_shifter.pretty")(options "")(descr ""))
+  (lib (name "MCU_RaspberryPi_and_Boards")(type "KiCad")(uri "C:/Users/micac/Documents/Projects/Hardware/KiCad/libraries/Pico/RP_Silicon_KiCad/KiCadLibraries/MCU_RaspberryPi_and_Boards.pretty")(options "")(descr ""))
+)

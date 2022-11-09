@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name "level_shifter")(type "KiCad")(uri "${KIPRJMOD}/level_shifter.kicad_sym")(options "")(descr ""))
+)
