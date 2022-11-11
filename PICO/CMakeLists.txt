@@ -11,9 +11,9 @@ add_executable(main)
 
 pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/drivers/ws2812/ws2812.pio)
 
-target_sources(main PRIVATE main.c drivers/ws2812/ws2812.c)
+target_sources(main PRIVATE main.c drivers/ws2812/ws2812.c drivers/apa102/apa102.c)
 
 pico_enable_stdio_usb(main 1)
 pico_enable_stdio_uart(main 1)
 pico_add_extra_outputs(main)
-target_link_libraries(main pico_stdlib hardware_pwm hardware_adc hardware_pio pico_bootsel_via_double_reset)
+target_link_libraries(main pico_stdlib hardware_pwm hardware_adc hardware_pio hardware_spi pico_bootsel_via_double_reset)
