@@ -37,10 +37,9 @@ int main()
     run_tcp_client_test();
     cyw43_arch_deinit();
 
-    // ws2812_init(NUM_PIXELS, WS2812_PIN, 0);
     apa102_init();
 
-    // while (1)
+    while (1)
     {
         apa102_test();
     }
