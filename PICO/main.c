@@ -39,8 +39,11 @@ int main()
 
     apa102_init();
 
+    uint8_t strip[2][3] = {{255, 0, 0},
+                           {0, 255, 0}};
+
     while (1)
     {
-        apa102_test();
+        apa102_write_strip(strip, 2);
     }
 }
