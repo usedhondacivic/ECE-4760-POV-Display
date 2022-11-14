@@ -27,12 +27,16 @@
 
 #define TCP_PORT 4242
 #define DEBUG_printf printf
-#define BUF_SIZE 2048
+
+#define LED_NUM 4
+#define ROTATIONS 10
+#define RPB 5
+#define PACKET_NUM (ROTATIONS / RPB)
+#define BUF_SIZE (LED_NUM * RPB * 3)
 
 #define TEST_ITERATIONS 10
 #define POLL_TIME_S 5
 
-#if 0
 static void dump_bytes(const uint8_t *bptr, uint32_t len) {
     unsigned int i = 0;
 
@@ -48,9 +52,7 @@ static void dump_bytes(const uint8_t *bptr, uint32_t len) {
     printf("\n");
 }
 #define DUMP_BYTES dump_bytes
-#else
-#define DUMP_BYTES(A,B)
-#endif
+
 
 typedef struct TCP_CLIENT_T_ {
     struct tcp_pcb *tcp_pcb;
@@ -150,7 +152,7 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     // cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
     if (p->tot_len > 0) {
-        DEBUG_printf("recv %d err %d\n", p->tot_len, err);
+        // DEBUG_printf("recv %d err %d\n", p->tot_len, err);
         for (struct pbuf *q = p; q != NULL; q = q->next) {
             DUMP_BYTES(q->payload, q->len);
         }
@@ -162,15 +164,22 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     }
     pbuf_free(p);
 
-    // If we have received the whole buffer, send it back to the server
-    if (state->buffer_len == BUF_SIZE) {
-        DEBUG_printf("Writing %d bytes to server\n", state->buffer_len);
-        err_t err = tcp_write(tpcb, state->buffer, state->buffer_len, TCP_WRITE_FLAG_COPY);
-        if (err != ERR_OK) {
-            DEBUG_printf("Failed to write data %d\n", err);
-            return tcp_result(arg, -1);
-        }
+    state->run_count++;
+    printf("count: %d\n", state->run_count);
+    if (state->run_count >= PACKET_NUM) {
+        tcp_result(arg, 0);
+        return ERR_OK;
     }
+
+    // If we have received the whole buffer, send it back to the server
+    // if (state->buffer_len == BUF_SIZE) {
+    //     DEBUG_printf("Writing %d bytes to server\n", state->buffer_len);
+    //     err_t err = tcp_write(tpcb, state->buffer, state->buffer_len, TCP_WRITE_FLAG_COPY);
+    //     if (err != ERR_OK) {
+    //         DEBUG_printf("Failed to write data %d\n", err);
+    //         return tcp_result(arg, -1);
+    //     }
+    // }
     return ERR_OK;
 }
 
