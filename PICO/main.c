@@ -3,7 +3,7 @@
 #include "hardware/gpio.h"
 #include "hardware/pwm.h"
 #include "hardware/uart.h"
-#include "./drivers/ws2812/ws2812.h"
+#include "./drivers/apa102/apa102.h"
 
 #define WS2812_PIN 2
 #define NUM_PIXELS 48
@@ -18,23 +18,33 @@ int main()
 {
     stdio_init_all();
 
-    if (cyw43_arch_init()) {
+    if (cyw43_arch_init())
+    {
         printf("failed to initialise\n");
         return 1;
     }
     cyw43_arch_enable_sta_mode();
 
     printf("Connecting to WiFi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) {
+    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000))
+    {
         printf("failed to connect.\n");
         return 1;
-    } else {
+    }
+    else
+    {
         printf("Connected.\n");
     }
     run_tcp_client_test();
     cyw43_arch_deinit();
 
-    // ws2812_init(NUM_PIXELS, WS2812_PIN, 0);
+    apa102_init();
 
-    // ws2812_pattern_snakes(NUM_PIXELS, 0);
+    uint8_t strip[2][3] = {{255, 0, 0},
+                           {0, 255, 0}};
+
+    while (1)
+    {
+        apa102_write_strip(strip, 2);
+    }
 }
