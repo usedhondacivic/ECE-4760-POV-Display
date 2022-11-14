@@ -72,9 +72,10 @@ void apa102_write_strip(uint8_t (*color_data)[3], uint16_t num_leds)
     for (int i = 0; i < num_leds; i++)
     {
         spi_buffer[i * 4 + 4] = 0b11111111; // Not full brightness so I don't kill my retinas
+        // APA102's we have are RBG instead of RGB,so flip the BG inputs here.
         spi_buffer[i * 4 + 5] = color_data[i][0];
-        spi_buffer[i * 4 + 6] = color_data[i][1];
-        spi_buffer[i * 4 + 7] = color_data[i][2];
+        spi_buffer[i * 4 + 6] = color_data[i][2];
+        spi_buffer[i * 4 + 7] = color_data[i][1];
     }
     spi_buffer[num_leds * 4 + 4] = 0xFF;
     spi_buffer[num_leds * 4 + 5] = 0xFF;
