@@ -13,9 +13,10 @@
 #include "lwip/pbuf.h"
 #include "lwip/tcp.h"
 
+#define LED_NUM 4
+#define ROTATIONS 10
 
-
-static void dump_bytes(const uint8_t *bptr, uint32_t len) ;
+// static void dump_bytes(const uint8_t *bptr, uint32_t len) ;
 
 // typedef struct TCP_CLIENT_T_ {
 //     struct tcp_pcb *tcp_pcb;
@@ -48,4 +49,4 @@ static bool tcp_client_open(void *arg) ;
 // Perform initialisation
 // static TCP_CLIENT_T* tcp_client_init(void) ;
 
-void run_tcp_client_test(void) ;
+void run_tcp_client_test(uint8_t (*led_array)[ROTATIONS][LED_NUM][3]) ;

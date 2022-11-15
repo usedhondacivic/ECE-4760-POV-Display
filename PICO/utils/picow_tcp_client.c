@@ -37,9 +37,12 @@
 #define TEST_ITERATIONS 10
 #define POLL_TIME_S 5
 
-static void dump_bytes(const uint8_t *bptr, uint32_t len) {
+static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot, uint8_t (*led_arr)[ROTATIONS][LED_NUM][3]) {
     unsigned int i = 0;
-
+    unsigned int led_i=0;
+    unsigned int rot_i=curr_rot;
+    unsigned char rgb_i=0;
+    uint8_t x;
     printf("dump_bytes %d", len);
     for (i = 0; i < len;) {
         if ((i & 0x0f) == 0) {
@@ -47,9 +50,17 @@ static void dump_bytes(const uint8_t *bptr, uint32_t len) {
         } else if ((i & 0x07) == 0) {
             printf(" ");
         }
-        printf("%02x ", bptr[i++]);
+        x = bptr[i++];
+        printf("%02x ", x);
+        printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
+        (*led_arr)[rot_i][led_i][rgb_i] = x;
+        if (rgb_i < 2) {rgb_i ++;}
+        else if (led_i < LED_NUM-1) {rgb_i = 0; led_i++;}
+        else {rgb_i = 0; led_i = 0; rot_i++;}
     }
+    if(led_i || rgb_i) printf("Uneven led or rgb");
     printf("\n");
+    return rot_i;
 }
 #define DUMP_BYTES dump_bytes
 
@@ -63,6 +74,8 @@ typedef struct TCP_CLIENT_T_ {
     bool complete;
     int run_count;
     bool connected;
+    uint8_t (*led_arr)[ROTATIONS][LED_NUM][3];
+    int curr_rot;
 } TCP_CLIENT_T;
 
 static err_t tcp_client_close(void *arg) {
@@ -151,10 +164,13 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     // can use this method to cause an assertion in debug mode, if this method is called when
     // cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
+    int rot;
     if (p->tot_len > 0) {
         // DEBUG_printf("recv %d err %d\n", p->tot_len, err);
         for (struct pbuf *q = p; q != NULL; q = q->next) {
-            DUMP_BYTES(q->payload, q->len);
+            rot = DUMP_BYTES(q->payload, q->len, state->curr_rot, state->led_arr);
+            if (rot != state->curr_rot + RPB) printf("Got wrong rotation increase");
+            state->curr_rot = rot;
         }
         // Receive the buffer
         const uint16_t buffer_left = BUF_SIZE - state->buffer_len;
@@ -212,18 +228,20 @@ static bool tcp_client_open(void *arg) {
 }
 
 // Perform initialisation
-static TCP_CLIENT_T* tcp_client_init(void) {
+static TCP_CLIENT_T* tcp_client_init(uint8_t (*led_array)[ROTATIONS][LED_NUM][3]) {
     TCP_CLIENT_T *state = calloc(1, sizeof(TCP_CLIENT_T));
     if (!state) {
         DEBUG_printf("failed to allocate state\n");
         return NULL;
     }
     ip4addr_aton(TEST_TCP_SERVER_IP, &state->remote_addr);
+    state->led_arr = led_array;
+    state->curr_rot = 0;
     return state;
 }
 
-void run_tcp_client_test(void) {
-    TCP_CLIENT_T *state = tcp_client_init();
+void run_tcp_client_test(uint8_t (*led_arr)[ROTATIONS][LED_NUM][3]) {
+    TCP_CLIENT_T *state = tcp_client_init(led_arr);
     if (!state) {
         return;
     }

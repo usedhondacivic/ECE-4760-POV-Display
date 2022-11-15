@@ -9,9 +9,15 @@
 #define NUM_PIXELS 48
 #include "./utils/picow_tcp_client.h"
 
+//WiFi Consts:
 #define WIFI_SSID "I14"
 #define WIFI_PASSWORD "horwitz3"
 #define TEST_TCP_SERVER_IP "172.20.10.2"
+
+#define LED_NUM 4
+#define ROTATIONS 10
+
+uint8_t (*led_array)[ROTATIONS][LED_NUM][3];
 
 
 int main()
@@ -35,7 +41,7 @@ int main()
     {
         printf("Connected.\n");
     }
-    run_tcp_client_test();
+    run_tcp_client_test(led_array);
     cyw43_arch_deinit();
 
     apa102_init();
