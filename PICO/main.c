@@ -5,6 +5,8 @@
 #include "hardware/uart.h"
 #include "./drivers/apa102/apa102.h"
 
+#include <math.h>
+
 #define WS2812_PIN 2
 #define NUM_PIXELS 48
 #include "./utils/picow_tcp_client.h"
@@ -40,10 +42,38 @@ int main()
     apa102_init();
 
     uint8_t strip[2][3] = {{255, 0, 0},
-                           {0, 255, 0}};
+                           {0, 0, 0}};
 
+    /*double t = 0;
     while (1)
     {
+        t += 0.01;
+        strip[0][0] = (int)(cos(t) * 120) + 125;
+        strip[0][1] = (int)(cos((double)t + 3.14 / 2) * 120) + 125;
+
+        apa102_write_strip(strip, 2);
+    }*/
+
+    int t = 0;
+    double d = 0;
+    while (1)
+    {
+        t++;
+        d += 0.001;
+        if (t % 2 == 1)
+        {
+            strip[0][0] = 255;
+            strip[0][1] = 255;
+            strip[0][2] = 255;
+        }
+        else
+        {
+            strip[0][0] = 0;
+            strip[0][1] = 0;
+            strip[0][2] = 0;
+        }
+        strip[1][0] = (int)(cos(d) * 120) + 125;
+        strip[1][1] = (int)(cos((double)d + 3.14 / 2) * 120) + 125;
         apa102_write_strip(strip, 2);
     }
 }

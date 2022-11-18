@@ -21,7 +21,7 @@ uint32_t end_marker = 0xFFFFFFFF;
 void apa102_init()
 {
     // This example will use SPI0 at 0.5MHz.
-    spi_init(SPI_PORT, 250 * 1000);
+    spi_init(SPI_PORT, 3000 * 1000);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
@@ -71,7 +71,7 @@ void apa102_write_strip(uint8_t (*color_data)[3], uint16_t num_leds)
     spi_buffer[3] = 0x00;
     for (int i = 0; i < num_leds; i++)
     {
-        spi_buffer[i * 4 + 4] = 0b11111111; // Not full brightness so I don't kill my retinas
+        spi_buffer[i * 4 + 4] = 0b11100001; // Not full brightness so I don't kill my retinas
         // APA102's we have are RBG instead of RGB,so flip the BG inputs here.
         spi_buffer[i * 4 + 5] = color_data[i][0];
         spi_buffer[i * 4 + 6] = color_data[i][2];
