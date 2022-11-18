@@ -12,7 +12,7 @@
 #define GPIO_IRQ_EDGE_RISE 0x8u
 #define WS2812_PIN 2
 #define NUM_PIXELS 48
-// #include "./utils/picow_tcp_client.h"
+#include "./utils/picow_tcp_client.h"
 
 // WiFi Consts:
 #define WIFI_SSID "I14"
@@ -42,17 +42,13 @@ void gpio_callback1(unsigned int gpio, uint32_t events)
 int main()
 {
     stdio_init_all();
-    gpio_init(GPIO_PIN);
-    gpio_set_dir(GPIO_PIN, 0);
-    printf("HELLO");
-    // gpio_set_irq_enabled(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1);
-    // gpio_set_irq_callback(gpio_callback1);
+    // gpio_init(GPIO_PIN);
+    // gpio_set_dir(GPIO_PIN, 0);
+    // printf("HELLO");
+    //  gpio_set_irq_enabled(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1);
+    //  gpio_set_irq_callback(gpio_callback1);
 
-    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_callback1);
-
-    while (1)
-    {
-    }
+    // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_callback1);
 
     if (cyw43_arch_init())
     {
@@ -76,8 +72,12 @@ int main()
 
     apa102_init();
 
-    uint8_t strip[2][3] = {{255, 0, 0},
-                           {0, 0, 0}};
+    uint8_t strip[NUM_PIXELS][3] = {
+        {255, 0, 0},
+        {0, 255, 0},
+        {0, 0, 0},
+        {0, 255, 0},
+        {255, 0, 0}};
 
     /*double t = 0;
     while (1)
@@ -94,21 +94,14 @@ int main()
     while (1)
     {
         t++;
-        d += 0.001;
-        if (t % 2 == 1)
+        d += 0.004;
+        for (int i = 0; i < NUM_PIXELS; i++)
         {
-            strip[0][0] = 255;
-            strip[0][1] = 255;
-            strip[0][2] = 255;
+            double a = d + ((double)i) / NUM_PIXELS;
+            strip[i][0] = (int)(cos(a) * 120) + 125;
+            strip[i][1] = (int)(cos(a * 1.25 + 3.14 / 2) * 120) + 125;
+            strip[i][2] = (int)(cos(a * 1.33 + 3.14 / 3) * 120) + 125;
         }
-        else
-        {
-            strip[0][0] = 0;
-            strip[0][1] = 0;
-            strip[0][2] = 0;
-        }
-        strip[1][0] = (int)(cos(d) * 120) + 125;
-        strip[1][1] = (int)(cos((double)d + 3.14 / 2) * 120) + 125;
-        apa102_write_strip(strip, 2);
+        apa102_write_strip(strip, NUM_PIXELS);
     }
 }
