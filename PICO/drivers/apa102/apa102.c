@@ -21,7 +21,7 @@ uint32_t end_marker = 0xFFFFFFFF;
 void apa102_init()
 {
     // This example will use SPI0 at 0.5MHz.
-    spi_init(SPI_PORT, 3000 * 1000);
+    spi_init(SPI_PORT, 10000 * 1000);
     gpio_set_function(PIN_MISO, GPIO_FUNC_SPI);
     gpio_set_function(PIN_SCK, GPIO_FUNC_SPI);
     gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI);
