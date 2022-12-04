@@ -42,7 +42,7 @@ void apa102_test()
         0x00,
         0x00,
         0x00,       // Start cond
-        0b11110001, // Brightness
+        0b11111111, // Brightness
         0xFF,       // RED
         0x00,       // BLUE
         0x00,       // GREEN

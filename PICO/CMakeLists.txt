@@ -23,4 +23,4 @@ target_sources(main PRIVATE main.c drivers/ws2812/ws2812.c utils/picow_tcp_clien
 pico_enable_stdio_usb(main 1)
 pico_enable_stdio_uart(main 1)
 pico_add_extra_outputs(main)
-target_link_libraries(main pico_stdlib hardware_pwm hardware_adc hardware_pio hardware_spi pico_cyw43_arch_lwip_threadsafe_background pico_bootsel_via_double_reset)
+target_link_libraries(main pico_stdlib pico_divider pico_multicore hardware_pio hardware_irq hardware_clocks hardware_sync hardware_pwm hardware_adc hardware_spi hardware_pll pico_cyw43_arch_lwip_threadsafe_background pico_bootsel_via_double_reset)

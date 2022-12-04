@@ -14,7 +14,7 @@
 #include "lwip/tcp.h"
 
 #define LED_NUM 40
-#define ROTATIONS 10
+#define ROTATIONS 20
 
 extern uint8_t led_array[ROTATIONS][LED_NUM][3];
 

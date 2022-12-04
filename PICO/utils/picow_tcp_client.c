@@ -27,7 +27,6 @@
 #define DEBUG_printf printf
 
 //#define LED_NUM 40
-#define ROTATIONS 10
 #define RPB 5
 #define PACKET_NUM (ROTATIONS / RPB)
 #define BUF_SIZE (LED_NUM * RPB * 3)
