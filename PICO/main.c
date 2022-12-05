@@ -8,6 +8,10 @@
 #include "hardware/uart.h"
 #include "hardware/sync.h"
 
+#include "hardware/clocks.h"
+#include "hardware/pll.h"
+#include "hardware/vreg.h"
+
 #include <string.h>
 #include <math.h>
 
@@ -25,39 +29,64 @@
 #define WIFI_PASSWORD "horwitz3"
 #define TEST_TCP_SERVER_IP "172.20.10.2"
 
-#define ROTATIONS 20
-
 volatile static unsigned int detect_time;
 volatile static unsigned int old_time;
-volatile static unsigned int time_period = 1000;
+volatile static unsigned int time_period = 10000;
 volatile static unsigned int curr_rot;
 
 #define GPIO_PIN 21
 
 int flag = 0;
 
-void gpio_callback1(unsigned int gpio, uint32_t events)
+volatile static unsigned int last_rise;
+
+void gpio_fall(unsigned int gpio, uint32_t events)
 {
     detect_time = time_us_32();
-    time_period = detect_time - old_time;
-    // printf("Detected \n");
-    // printf("time_period: %u", time_period);
-    flag = !flag;
-    old_time = detect_time;
-    curr_rot = 0;
+
+    if (detect_time - last_rise > 2000 && detect_time - old_time > 20000)
+    {
+        time_period = detect_time - old_time;
+        // printf("Detected \n");
+        printf("time_period: %u", time_period);
+
+        old_time = detect_time;
+        curr_rot = 0;
+    }
+    // reset_flag = 1;
+    // last_zero_time = detect_time;
+    // printf("Time: %d\n", time_period);
+}
+
+void gpio_rise(unsigned int gpio, uint32_t events)
+{
+    last_rise = time_us_32();
 }
 
 static PT_THREAD(protothread_timing(struct pt *pt))
 {
     // Mark beginning of thread
     PT_BEGIN(pt);
+    static int begin_time;
+    static int spare_time;
     while (1)
     {
+        // Measure time at start of thread
+        begin_time = time_us_32();
         apa102_write_strip(led_array[curr_rot % ROTATIONS], LED_NUM);
         curr_rot++;
-        // printf(".");
         unsigned int theta_time = time_period / ROTATIONS;
-        PT_YIELD_usec(theta_time);
+        spare_time = theta_time - (time_us_32() - begin_time);
+
+        if (spare_time < 0)
+        {
+            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        }
+        else
+        {
+            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        }
+        PT_YIELD_usec(spare_time);
     }
     PT_END(pt);
 }
@@ -73,7 +102,7 @@ static PT_THREAD(protothread_tcp(struct pt *pt))
             PT_YIELD_usec(100000);
         }
         printf("TCP ");
-        PT_YIELD_usec(100000);
+        PT_YIELD_usec(1000000);
     }
     PT_END(pt);
 }
@@ -88,6 +117,9 @@ void core1_main()
 
 int main()
 {
+    vreg_set_voltage(VREG_VOLTAGE_1_30);
+    set_sys_clock_khz(250000, true);
+
     stdio_init_all();
 
     apa102_init();
@@ -102,11 +134,13 @@ int main()
 
     gpio_init(GPIO_PIN);
     gpio_set_dir(GPIO_PIN, 0);
+    gpio_set_pulls(GPIO_PIN, true, false);
     // printf("HELLO");
     // gpio_set_irq_enabled(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1);
     // gpio_set_irq_callback(gpio_callback1);
 
-    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_callback1);
+    // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_rise);
+    // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
 
     if (cyw43_arch_init())
     {

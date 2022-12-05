@@ -27,7 +27,7 @@
 #define DEBUG_printf printf
 
 //#define LED_NUM 40
-#define RPB 5
+#define RPB 2
 #define PACKET_NUM (ROTATIONS / RPB)
 #define BUF_SIZE (LED_NUM * RPB * 3)
 
@@ -51,46 +51,27 @@ typedef struct TCP_CLIENT_T_
 
 static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot)
 {
-    unsigned int i = 0;
-    unsigned int led_i = 0;
-    unsigned int rot_i = curr_rot;
-    unsigned char rgb_i = 0;
+    // unsigned int start_i = curr_rot * ROTATIONS * LED_NUM * 3;
+    static unsigned int arr_i = 0;
+    unsigned int led_i;
+    unsigned int rot_i;
+    unsigned char rgb_i;
     uint8_t x;
-    printf("dump_bytes %d", len);
-    for (i = 0; i < len;)
+    // printf("dump_bytes %d\n", len);
+    for (unsigned int i = 0; i < len; i++)
     {
-        if ((i & 0x0f) == 0)
-        {
-            printf("\n");
-        }
-        else if ((i & 0x07) == 0)
-        {
-            printf(" ");
-        }
-        x = bptr[i++];
+        x = bptr[i];
+        // arr_i = start_i + i;
+        rgb_i = arr_i % 3;
+        led_i = (arr_i / 3) % LED_NUM;
+        rot_i = (arr_i / (LED_NUM * 3)) % ROTATIONS;
         led_array[rot_i][led_i][rgb_i] = x;
-        printf("Should be: %d, Got: %d | ", x, led_array[rot_i][led_i][rgb_i]);
-        printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
-        if (rgb_i < 2)
-        {
-            rgb_i++;
-        }
-        else if (led_i < LED_NUM - 1)
-        {
-            rgb_i = 0;
-            led_i++;
-        }
-        else
-        {
-            rgb_i = 0;
-            led_i = 0;
-            rot_i++;
-        }
+        arr_i++;
+        // printf("Should be: %d, Got: %d | ", x, led_array[rot_i][led_i][rgb_i]);
+        // printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
     }
-    if (led_i || rgb_i)
-        printf("Uneven led or rgb");
-    printf("\n");
-    return rot_i;
+    // printf("\n");
+    return rot_i + 1;
 }
 #define DUMP_BYTES dump_bytes
 
@@ -198,6 +179,7 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     // cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
     int rot;
+    state->curr_rot = 0;
     if (p->tot_len > 0)
     {
         // DEBUG_printf("recv %d err %d\n", p->tot_len, err);
@@ -205,17 +187,17 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
         {
             rot = DUMP_BYTES(q->payload, q->len, state->curr_rot);
             if (rot != state->curr_rot + RPB)
-                printf("Got wrong rotation increase");
-            state->curr_rot = rot;
+                printf("Got wrong rotation increase: Should be: %d, got: %d\n", state->curr_rot + RPB, rot);
+            state->curr_rot += RPB;
         }
-        printf("PRINT FROM CLIENT");
+        /*printf("PRINT FROM CLIENT");
         for (int r = 0; r < ROTATIONS; r++)
         {
             for (int l = 0; l < LED_NUM; l++)
             {
                 printf("ROT: %d, LED: %d, R: %d, G:%d, B: %d\n", r, l, led_array[r][l][0], led_array[r][l][1], led_array[r][l][2]);
             }
-        }
+        }*/
         // Receive the buffer
         const uint16_t buffer_left = BUF_SIZE - state->buffer_len;
         state->buffer_len += pbuf_copy_partial(p, state->buffer + state->buffer_len,
