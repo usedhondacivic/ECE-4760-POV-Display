@@ -12,7 +12,7 @@ def bmp_to_rad(path, num_pix, res):
 
     w, h, _ = img.shape
     out_r = min(int(w/2)-1,int(h/2)-1)
-    ths = np.linspace(0, 2*np.pi, res)
+    ths = np.linspace(-np.pi*0.6, 1.4*np.pi, res)
     rs = np.linspace(0, out_r, num_pix)
     xs = np.array([rs * np.sin(th) for th in ths], dtype=int) + int(w/2)
     ys = -((np.array([rs * np.cos(th) for th in ths], dtype=int) + int(h/2)))
