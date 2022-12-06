@@ -44,7 +44,7 @@ void gpio_fall(unsigned int gpio, uint32_t events)
 {
     detect_time = time_us_32();
 
-    if (detect_time - last_rise > 2000 && detect_time - old_time > 20000)
+    if (detect_time - old_time > 10000)
     {
         time_period = detect_time - old_time;
         // printf("Detected \n");
@@ -58,10 +58,10 @@ void gpio_fall(unsigned int gpio, uint32_t events)
     // printf("Time: %d\n", time_period);
 }
 
-void gpio_rise(unsigned int gpio, uint32_t events)
-{
-    last_rise = time_us_32();
-}
+// void gpio_rise(unsigned int gpio, uint32_t events)
+// {
+//     last_rise = time_us_32();
+// }
 
 static PT_THREAD(protothread_timing(struct pt *pt))
 {
@@ -139,8 +139,15 @@ int main()
     // gpio_set_irq_enabled(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1);
     // gpio_set_irq_callback(gpio_callback1);
 
-    // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_rise);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_fall);
     // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
+
+    volatile int i = 0;
+
+    while (1)
+    {
+        i++;
+    }
 
     if (cyw43_arch_init())
     {
