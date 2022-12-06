@@ -25,9 +25,9 @@
 #include "./utils/picow_tcp_client.h"
 
 // WiFi Consts:
-#define WIFI_SSID "iBhone"
-#define WIFI_PASSWORD "ganggang"
-#define TEST_TCP_SERVER_IP "172.20.10.5"
+#define WIFI_SSID "I14"
+#define WIFI_PASSWORD "horwitz3"
+#define TEST_TCP_SERVER_IP "172.20.10.2"
 
 volatile static unsigned int detect_time;
 volatile static unsigned int old_time;
@@ -48,7 +48,7 @@ void gpio_fall(unsigned int gpio, uint32_t events)
     {
         time_period = detect_time - old_time;
         // printf("Detected \n");
-        printf("time_period: %u", time_period);
+        // printf("time_period: %u", time_period);
 
         old_time = detect_time;
         curr_rot = 0;
@@ -179,13 +179,13 @@ int main()
     //     sleep_ms(100 / 5);
     // }
 
+    // start core 1
+    multicore_reset_core1();
+    multicore_launch_core1(&core1_main);
+
     // Listen for wifi updates
     pt_add_thread(protothread_tcp);
 
     // start core 0 scheduler
     pt_schedule_start;
-
-    // start core 1
-    multicore_reset_core1();
-    multicore_launch_core1(&core1_main);
 }
