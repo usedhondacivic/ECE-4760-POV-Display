@@ -2,6 +2,8 @@
     "files.associations": {
         "uart.h": "c",
         "stdlib.h": "c",
-        "cyw43_arch.h": "c"
+        "cyw43_arch.h": "c",
+        "hall_effect.h": "c",
+        "apa102.h": "c"
     }
 }

@@ -19,53 +19,25 @@
 
 #include "picow_tcp_client.h"
 
-
 #define WIFI_SSID "I14"
 #define WIFI_PASSWORD "horwitz3"
 #define TEST_TCP_SERVER_IP "172.20.10.2"
 
-
 #define TCP_PORT 4242
 #define DEBUG_printf printf
 
-#define LED_NUM 4
-#define ROTATIONS 10
-#define RPB 5
+//#define LED_NUM 40
+#define RPB 2
 #define PACKET_NUM (ROTATIONS / RPB)
 #define BUF_SIZE (LED_NUM * RPB * 3)
 
 #define TEST_ITERATIONS 10
 #define POLL_TIME_S 5
 
-static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot, uint8_t (*led_arr)[ROTATIONS][LED_NUM][3]) {
-    unsigned int i = 0;
-    unsigned int led_i=0;
-    unsigned int rot_i=curr_rot;
-    unsigned char rgb_i=0;
-    uint8_t x;
-    printf("dump_bytes %d", len);
-    for (i = 0; i < len;) {
-        if ((i & 0x0f) == 0) {
-            printf("\n");
-        } else if ((i & 0x07) == 0) {
-            printf(" ");
-        }
-        x = bptr[i++];
-        printf("%02x ", x);
-        printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
-        (*led_arr)[rot_i][led_i][rgb_i] = x;
-        if (rgb_i < 2) {rgb_i ++;}
-        else if (led_i < LED_NUM-1) {rgb_i = 0; led_i++;}
-        else {rgb_i = 0; led_i = 0; rot_i++;}
-    }
-    if(led_i || rgb_i) printf("Uneven led or rgb");
-    printf("\n");
-    return rot_i;
-}
-#define DUMP_BYTES dump_bytes
+uint8_t led_array[ROTATIONS][LED_NUM][3];
 
-
-typedef struct TCP_CLIENT_T_ {
+typedef struct TCP_CLIENT_T_
+{
     struct tcp_pcb *tcp_pcb;
     ip_addr_t remote_addr;
     uint8_t buffer[BUF_SIZE];
@@ -74,21 +46,49 @@ typedef struct TCP_CLIENT_T_ {
     bool complete;
     int run_count;
     bool connected;
-    uint8_t (*led_arr)[ROTATIONS][LED_NUM][3];
     int curr_rot;
 } TCP_CLIENT_T;
 
-static err_t tcp_client_close(void *arg) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
+static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot)
+{
+    // unsigned int start_i = curr_rot * ROTATIONS * LED_NUM * 3;
+    static unsigned int arr_i = 0;
+    unsigned int led_i;
+    unsigned int rot_i;
+    unsigned char rgb_i;
+    uint8_t x;
+    // printf("dump_bytes %d\n", len);
+    for (unsigned int i = 0; i < len; i++)
+    {
+        x = bptr[i];
+        // arr_i = start_i + i;
+        rgb_i = arr_i % 3;
+        led_i = (arr_i / 3) % LED_NUM;
+        rot_i = (arr_i / (LED_NUM * 3)) % ROTATIONS;
+        led_array[rot_i][led_i][rgb_i] = x;
+        arr_i++;
+        // printf("Should be: %d, Got: %d | ", x, led_array[rot_i][led_i][rgb_i]);
+        // printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
+    }
+    // printf("\n");
+    return rot_i + 1;
+}
+#define DUMP_BYTES dump_bytes
+
+static err_t tcp_client_close(void *arg)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
     err_t err = ERR_OK;
-    if (state->tcp_pcb != NULL) {
+    if (state->tcp_pcb != NULL)
+    {
         tcp_arg(state->tcp_pcb, NULL);
         tcp_poll(state->tcp_pcb, NULL, 0);
         tcp_sent(state->tcp_pcb, NULL);
         tcp_recv(state->tcp_pcb, NULL);
         tcp_err(state->tcp_pcb, NULL);
         err = tcp_close(state->tcp_pcb);
-        if (err != ERR_OK) {
+        if (err != ERR_OK)
+        {
             DEBUG_printf("close failed %d, calling abort\n", err);
             tcp_abort(state->tcp_pcb);
             err = ERR_ABRT;
@@ -99,26 +99,33 @@ static err_t tcp_client_close(void *arg) {
 }
 
 // Called with results of operation
-static err_t tcp_result(void *arg, int status) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
-    if (status == 0) {
+static err_t tcp_result(void *arg, int status)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
+    if (status == 0)
+    {
         DEBUG_printf("test success\n");
-    } else {
+    }
+    else
+    {
         DEBUG_printf("test failed %d\n", status);
     }
     state->complete = true;
     return tcp_client_close(arg);
 }
 
-static err_t tcp_client_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
+static err_t tcp_client_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
     DEBUG_printf("tcp_client_sent %u\n", len);
     state->sent_len += len;
 
-    if (state->sent_len >= BUF_SIZE) {
+    if (state->sent_len >= BUF_SIZE)
+    {
 
         state->run_count++;
-        if (state->run_count >= TEST_ITERATIONS) {
+        if (state->run_count >= TEST_ITERATIONS)
+        {
             tcp_result(arg, 0);
             return ERR_OK;
         }
@@ -132,9 +139,11 @@ static err_t tcp_client_sent(void *arg, struct tcp_pcb *tpcb, u16_t len) {
     return ERR_OK;
 }
 
-static err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
-    if (err != ERR_OK) {
+static err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
+    if (err != ERR_OK)
+    {
         printf("connect failed %d\n", err);
         return tcp_result(arg, err);
     }
@@ -143,21 +152,26 @@ static err_t tcp_client_connected(void *arg, struct tcp_pcb *tpcb, err_t err) {
     return ERR_OK;
 }
 
-static err_t tcp_client_poll(void *arg, struct tcp_pcb *tpcb) {
+static err_t tcp_client_poll(void *arg, struct tcp_pcb *tpcb)
+{
     DEBUG_printf("tcp_client_poll\n");
     return tcp_result(arg, -1); // no response is an error?
 }
 
-static void tcp_client_err(void *arg, err_t err) {
-    if (err != ERR_ABRT) {
+static void tcp_client_err(void *arg, err_t err)
+{
+    if (err != ERR_ABRT)
+    {
         DEBUG_printf("tcp_client_err %d\n", err);
         tcp_result(arg, err);
     }
 }
 
-err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
-    if (!p) {
+err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
+    if (!p)
+    {
         return tcp_result(arg, -1);
     }
     // this method is callback from lwIP, so cyw43_arch_lwip_begin is not required, however you
@@ -165,13 +179,25 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     // cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
     int rot;
-    if (p->tot_len > 0) {
+    state->curr_rot = 0;
+    if (p->tot_len > 0)
+    {
         // DEBUG_printf("recv %d err %d\n", p->tot_len, err);
-        for (struct pbuf *q = p; q != NULL; q = q->next) {
-            rot = DUMP_BYTES(q->payload, q->len, state->curr_rot, state->led_arr);
-            if (rot != state->curr_rot + RPB) printf("Got wrong rotation increase");
-            state->curr_rot = rot;
+        for (struct pbuf *q = p; q != NULL; q = q->next)
+        {
+            rot = DUMP_BYTES(q->payload, q->len, state->curr_rot);
+            if (rot != state->curr_rot + RPB)
+                printf("Got wrong rotation increase: Should be: %d, got: %d\n", state->curr_rot + RPB, rot);
+            state->curr_rot += RPB;
         }
+        /*printf("PRINT FROM CLIENT");
+        for (int r = 0; r < ROTATIONS; r++)
+        {
+            for (int l = 0; l < LED_NUM; l++)
+            {
+                printf("ROT: %d, LED: %d, R: %d, G:%d, B: %d\n", r, l, led_array[r][l][0], led_array[r][l][1], led_array[r][l][2]);
+            }
+        }*/
         // Receive the buffer
         const uint16_t buffer_left = BUF_SIZE - state->buffer_len;
         state->buffer_len += pbuf_copy_partial(p, state->buffer + state->buffer_len,
@@ -182,7 +208,8 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
 
     state->run_count++;
     printf("count: %d\n", state->run_count);
-    if (state->run_count >= PACKET_NUM) {
+    if (state->run_count >= PACKET_NUM)
+    {
         tcp_result(arg, 0);
         return ERR_OK;
     }
@@ -199,11 +226,13 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     return ERR_OK;
 }
 
-static bool tcp_client_open(void *arg) {
-    TCP_CLIENT_T *state = (TCP_CLIENT_T*)arg;
+static bool tcp_client_open(void *arg)
+{
+    TCP_CLIENT_T *state = (TCP_CLIENT_T *)arg;
     DEBUG_printf("Connecting to %s port %u\n", ip4addr_ntoa(&state->remote_addr), TCP_PORT);
     state->tcp_pcb = tcp_new_ip_type(IP_GET_TYPE(&state->remote_addr));
-    if (!state->tcp_pcb) {
+    if (!state->tcp_pcb)
+    {
         DEBUG_printf("failed to create pcb\n");
         return false;
     }
@@ -228,28 +257,32 @@ static bool tcp_client_open(void *arg) {
 }
 
 // Perform initialisation
-static TCP_CLIENT_T* tcp_client_init(uint8_t (*led_array)[ROTATIONS][LED_NUM][3]) {
+static TCP_CLIENT_T *tcp_client_init()
+{
     TCP_CLIENT_T *state = calloc(1, sizeof(TCP_CLIENT_T));
-    if (!state) {
+    if (!state)
+    {
         DEBUG_printf("failed to allocate state\n");
         return NULL;
     }
     ip4addr_aton(TEST_TCP_SERVER_IP, &state->remote_addr);
-    state->led_arr = led_array;
     state->curr_rot = 0;
     return state;
 }
 
-void run_tcp_client_test(uint8_t (*led_arr)[ROTATIONS][LED_NUM][3]) {
-    TCP_CLIENT_T *state = tcp_client_init(led_arr);
-    if (!state) {
-        return;
+int run_tcp_client_test()
+{
+    TCP_CLIENT_T *state = tcp_client_init();
+    if (!state)
+    {
+        return -1;
     }
-    if (!tcp_client_open(state)) {
-        tcp_result(state, -1);
-        return;
+    if (!tcp_client_open(state))
+    {
+        return tcp_result(state, -1);
     }
-    while(!state->complete) {
+    while (!state->complete)
+    {
         // the following #ifdef is only here so this same example can be used in multiple modes;
         // you do not need it in your code
 #if PICO_CYW43_ARCH_POLL
@@ -264,7 +297,8 @@ void run_tcp_client_test(uint8_t (*led_arr)[ROTATIONS][LED_NUM][3]) {
         sleep_ms(1000);
 #endif
     }
-    free(state);
+    // free(state);
+    return 0;
 }
 
 // int main() {
