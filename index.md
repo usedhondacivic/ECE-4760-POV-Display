@@ -21,3 +21,5 @@ Project structure:
 		 - STL files for 3D printing the mechanical structure
 	 - /ELECTRICAL
 		 - KiCad project files for the rotor and control board PCBs
+
+test
