@@ -1,0 +1,1 @@
+making the docs/assets folder the lazy way

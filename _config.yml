@@ -1,0 +1,8 @@
+title: CNC Combination Cracker
+description: For all your cracking needs
+google_analytics: 
+show_downloads: true
+theme: jekyll-theme-minimal
+
+gems:
+  - jekyll-mentions
