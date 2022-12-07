@@ -5,21 +5,4 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 ![Three examples of the POV Display running](https://github.com/usedhondacivic/ECE-4760-final-project/blob/09e4d72bde516a27118cdfb5415e74ec57157b85/photos/POV_banner.png?raw=true)
 
-Project structure:
- - /PICO
-	 - main.c
-		 - Code entry point on the pico
-	 - /drivers/apa102
-		- Driver for the SPI based APA102 LEDs
-	 - /utils/picow_tcp_client.c
-		 - Driver for the TCP client
- - /PYTHON
-	 - wifi.py
-		 - TCP server for sending image data
- - /HARDWARE
-	 - /CAD
-		 - STL files for 3D printing the mechanical structure
-	 - /ELECTRICAL
-		 - KiCad project files for the rotor and control board PCBs
-
-test
+Insert write up here :)
