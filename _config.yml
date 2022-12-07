@@ -4,8 +4,4 @@ google_analytics:
 show_downloads: true
 theme: just-the-docs
 
-plugins:
-  - jekyll-mentions
-
-aux_links:
-  Template Repository: https://github.com/just-the-docs/just-the-docs-template
+url: https://michael-crum.com/ECE-4760-final-project
