@@ -2,4 +2,7 @@ title: Persistence of Vision Display
 description: 30 FPS, full RGB color, and 26" diameter. Updates remotely over WIFI.
 theme: minima
 
+minima:
+  skin: dark
+
 url: https://usedhondacivic.github.io/ECE-4760-final-project
