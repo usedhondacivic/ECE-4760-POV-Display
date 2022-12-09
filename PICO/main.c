@@ -48,7 +48,7 @@ void gpio_fall(unsigned int gpio, uint32_t events)
     {
         time_period = detect_time - old_time;
         // printf("Detected \n");
-        printf("time_period: %u", time_period);
+        // printf("time_period: %u", time_period);
 
         old_time = detect_time;
         curr_rot = 0;
@@ -67,8 +67,8 @@ static PT_THREAD(protothread_timing(struct pt *pt))
 {
     // Mark beginning of thread
     PT_BEGIN(pt);
-    static int begin_time;
-    static int spare_time;
+    volatile static int begin_time;
+    volatile static int spare_time;
     while (1)
     {
         // Measure time at start of thread
@@ -78,14 +78,15 @@ static PT_THREAD(protothread_timing(struct pt *pt))
         unsigned int theta_time = time_period / ROTATIONS;
         spare_time = theta_time - (time_us_32() - begin_time);
 
-        if (spare_time < 0)
-        {
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-        }
-        else
-        {
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
-        }
+        // if (spare_time < 0)
+        // {
+        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+        // }
+        // else
+        // {
+        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
+        // }
+
         PT_YIELD_usec(spare_time);
     }
     PT_END(pt);
@@ -110,8 +111,9 @@ static PT_THREAD(protothread_tcp(struct pt *pt))
 void core1_main()
 {
     // Add led timing thread
+
     pt_add_thread(protothread_timing);
-    //  Start the core 1 scheduler
+    //   Start the core 1 scheduler
     pt_schedule_start;
 }
 
@@ -142,13 +144,6 @@ int main()
     gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_fall);
     // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
 
-    volatile int i = 0;
-
-    while (1)
-    {
-        i++;
-    }
-
     if (cyw43_arch_init())
     {
         printf("failed to initialise\n");
@@ -173,6 +168,7 @@ int main()
         printf("FAILED\n");
         return 1;
     }
+
     // cyw43_arch_deinit();
 
     // int i = 0;
