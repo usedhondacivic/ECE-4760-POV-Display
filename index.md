@@ -8,7 +8,7 @@ Project Introduction (*One sentence "sound bite" that describes your project. A 
 
 A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can trasnmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
 
-The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 LEDs as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W tranmit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
+The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 light emitting diodes (LEDs) as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W tranmit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
 
 High level design
 * *Rationale and sources of your project idea*
@@ -16,6 +16,14 @@ High level design
 * *logical structure*
 * *hardware/software tradeoffs*
 * *Discuss existing patents, copyrights, and trademarks which are relevant toyour project.*
+*
+The original idea for this project came from a video that Rabail saw of a similar POV display on Youtube.com. We approached our professor, Hunter Adams, to discuss whether this would actually be a viable project idea and on his confirmation we started brainstorming about the POV display. Initially, we thought of implementing the display on a propeller fan as we had seen on Youtube, but eventually we chose to build the rotor and arm of the POV display ourselves for a cleaner project. This did end up increasing the complexity a bit as we had to map a Cartesian coordinate system of the images to a polar coordinate system.
+
+The logical structure of our project is relatively straightforward. Our software calculates the time duration to display each "pixel" on the display by simply measuring the period of each rotation using a Hall Effect sensor and a magnet. By turning on the LEDs for just that duration of time, we can then display the pixels and ensure proper image orientation at each rotation.....
+
+The nature of our design allows the hardware and software tradeoffs to be independent of each other. The more robust we make our software (i.e. optimized code, error-free LED mapping), the more optimized and error free our project becomes. Similarly, by making our hardware more robust (i.e. using heat sinks, tying down wires, using bigger motors), we get a higher resolution of our system and also make the project safer. 
+
+Our project does not include any known existing patents, copyrights, or trademarks. We designed all the hardware from scratch. Most of the software is also our original work with the exception of the open-source example code published by Raspberry Pi.
 
 Program/hardware design
 * *program details. What parts were tricky to write?*
