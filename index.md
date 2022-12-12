@@ -6,10 +6,11 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 Insert write up here :)
 
-Project Introduction
+Project Introduction (*One sentence "sound bite" that describes your project. A summary of what you did and why.*)
 
-*One sentence "sound bite" that describes your project.
-A summary of what you did and why.*
+A persistence of vision (POV) refers to the phenomenon of the human eye in which an afterimage exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's through a two dimensional space at such a high frequency that a two dimensional display is visible. The stream of light is repeatedly interrupted for brief instances and does not enter our eyes during those durations but by ensuring that the rotational speed of the LED's is fast enough, the human eye perceives a complete two dimensional image.
+
+This is the basic principle behind the making of the animated movies.
 
 High level design
 * *Rationale and sources of your project idea*
