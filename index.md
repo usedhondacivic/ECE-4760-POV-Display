@@ -4,13 +4,11 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 ![Three examples of the POV Display running](https://github.com/usedhondacivic/ECE-4760-final-project/blob/09e4d72bde516a27118cdfb5415e74ec57157b85/photos/POV_banner.png?raw=true)
 
-Insert write up here :)
-
 Project Introduction (*One sentence "sound bite" that describes your project. A summary of what you did and why.*)
 
-A persistence of vision (POV) refers to the phenomenon of the human eye in which an afterimage exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's through a two dimensional space at such a high frequency that a two dimensional display is visible. The stream of light is repeatedly interrupted for brief instances and does not enter our eyes during those durations but by ensuring that the rotational speed of the LED's is fast enough, the human eye perceives a complete two dimensional image.
+A persistence of vision (POV) refers to the phenomenon of the human eye in which an afterimage exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can trasnmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
 
-This is the basic principle behind the making of the animated movies.
+The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 LEDs as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W tranmit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
 
 High level design
 * *Rationale and sources of your project idea*
