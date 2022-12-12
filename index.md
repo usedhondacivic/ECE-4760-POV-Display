@@ -31,6 +31,8 @@ Program/hardware design
 * *Be sure to specifically reference any design or code you used from someone else.*
 * *Things you tried which did not work*
 
+The main components of our mechanical design are a motor, a spinning arm with 2 PCBs attached, and two 3D printed mounts for the motor as well as for the spinning arm which were designed and 3D printed. The mount acts as the main support for the arm as it is connected to the spinning shaft of the motor. Since the motor did not have its own self-supporting component, we also built a mount to ensure that it stays upright. This mount provides great stability while the motor is spinning at high speeds and as an additional precaution, we also clamped the main mounting bracket to a table during the demonstration. Furthermore, to ensure that we don't get too much swaying in the arm itself at the high speeds we were testing at, we positioned the electrical components on the spinning arm to provide good counterbalance on both sides and used nuts to balance the weights on both sides.
+
 Results of the design
 * *Any and all test data, scope traces, waveforms, etc*
 * *speed of execution (hesitation, filcker, interactiveness, concurrency)*
