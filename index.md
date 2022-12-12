@@ -16,7 +16,7 @@ High level design
 * *logical structure*
 * *hardware/software tradeoffs*
 * *Discuss existing patents, copyrights, and trademarks which are relevant toyour project.*
-*
+
 The original idea for this project came from a video that Rabail saw of a similar POV display on Youtube.com. We approached our professor, Hunter Adams, to discuss whether this would actually be a viable project idea and on his confirmation we started brainstorming about the POV display. Initially, we thought of implementing the display on a propeller fan as we had seen on Youtube, but eventually we chose to build the rotor and arm of the POV display ourselves for a cleaner project. This did end up increasing the complexity a bit as we had to map a Cartesian coordinate system of the images to a polar coordinate system.
 
 The logical structure of our project is relatively straightforward. Our software calculates the time duration to display each "pixel" on the display by simply measuring the period of each rotation using a Hall Effect sensor and a magnet. By turning on the LEDs for just that duration of time, we can then display the pixels and ensure proper image orientation at each rotation.....
