@@ -63,13 +63,15 @@ void apa102_test()
 void apa102_write_strip(uint8_t (*color_data)[3], uint16_t num_leds)
 {
     uint8_t spi_buffer[num_leds * 4 + 8];
+    // Start frame
     spi_buffer[0] = 0x00;
     spi_buffer[1] = 0x00;
     spi_buffer[2] = 0x00;
     spi_buffer[3] = 0x00;
+    // LED frames
     for (int i = 0; i < num_leds; i++)
     {
-        if (i < 5)
+        if (i < 5) // Inner most LEDs move slower, so appear brighter. Lower their brightness
         {
             spi_buffer[i * 4 + 4] = 0b11100001; // Not full brightness so I don't kill my retinas
         }
@@ -82,6 +84,7 @@ void apa102_write_strip(uint8_t (*color_data)[3], uint16_t num_leds)
         spi_buffer[i * 4 + 6] = color_data[i][2];
         spi_buffer[i * 4 + 7] = color_data[i][1];
     }
+    // End frame
     spi_buffer[num_leds * 4 + 4] = 0xFF;
     spi_buffer[num_leds * 4 + 5] = 0xFF;
     spi_buffer[num_leds * 4 + 6] = 0xFF;
