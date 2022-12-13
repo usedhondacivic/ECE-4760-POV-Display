@@ -28,11 +28,10 @@ Our project does not include any known existing patents, copyrights, or trademar
 
 ## Software
 
-Our program had several steps. First, we developed a Python script to converted bitmap images into a custom, polar coordinate data format which could be used to display images on the POV display. Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation. The main challenge in the program for displaying the image was in timing. The thread to change the LEDs had to run exactly as quickly as needed to loop through the entire image during one spin of the blade. This was accomplished by timing one rotational period using a hall effect sensor and magnet. A hall effect sensor attached to the spinning microcontroller would trigger an interrupt every time it passed a magnet fastened to a stationary base. By timing the interrupts and dividing by the target number of rotations, the timing of LED changes could be adjusted on the fly to guarantee a complete and steady image.
-
 ### Python Image Preprocessing
 
-**TODO: FILL THIS IN**
+Our program had several steps. First, we developed a Python script to converted bitmap images into a custom, polar coordinate data format which could be used to display images on the POV display.
+**TODO: MORE DETAIL / PICTURES**
 
 ### Python TCP Server
 
@@ -101,7 +100,8 @@ When the interrupt is triggered, the period of rotation is calculated by subtrac
 
 ### Pico TCP Client
 
-**TODO: FILL THIS IN**
+Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation.
+**TODO: MORE DETAIL / CODE**
 
 ### Pico Entry Point
 
