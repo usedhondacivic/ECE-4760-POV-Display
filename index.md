@@ -8,7 +8,7 @@ Project Introduction (*One sentence "sound bite" that describes your project. A 
 
 # Project Introduction
 
-We built a persistance of vision display which can simulate any image with a rotating strip of LEDs.
+We built a persistance of vision display which can create any image with a rotating strip of LEDs.
 
 A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can trasnmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
 
@@ -39,15 +39,33 @@ Program/hardware design
 * *Be sure to specifically reference any design or code you used from someone else.*
 * *Things you tried which did not work*
 
-# Design
+# Design Details
 
 ## Software
 
 Our program had several steps. First, we developed a Python script to converted bitmap images into a custom, polar coordinate data format which could be used to display images on the POV display. Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation. The main challenge in the program for displaying the image was in timing. The thread to change the LEDs had to run exactly as quickly as needed to loop through the entire image during one spin of the blade. This was accomplished by timing one rotational period using a hall effect sensor and magnet. A hall effect sensor attached to the spinning microcontroller would trigger an interrupt every time it passed a magnet fastened to a stationary base. By timing the interrupts and dividing by the target number of rotations, the timing of LED changes could be adjusted on the fly to guarantee a complete and steady image.
 
-## Hardware
+### Python
 
-The main components of our mechanical design are a motor, a spinning arm with 2 PCBs attached, and two 3D printed mounts for the motor as well as for the spinning arm which were designed and 3D printed. The mount acts as the main support for the arm as it is connected to the spinning shaft of the motor. Since the motor did not have its own self-supporting component, we also built a mount to ensure that it stays upright. This mount provides great stability while the motor is spinning at high speeds and as an additional precaution, we also clamped the main mounting bracket to a table during the demonstration. Furthermore, to ensure that we don't get too much swaying in the arm itself at the high speeds we were testing at, we positioned the electrical components on the spinning arm to provide good counterbalance on both sides and used nuts to balance the weights on both sides.
+### Device Drivers
+
+### Pico Entry Point
+
+## Electrical
+
+In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are king. Made from high strength PTFE substrate, these boards can stand many thousands of G's, and soldered connections are extremely resilient to the characteristic forces of a POV display. They are also light weight and slightly flexible, making them even more suitable for our use case. We decided to create two PCB's for our design.
+
+The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED's and provides standard 0.1 inch headers for interfacing with the LEDs. We added a M3 sided hole on each end of the arm, which allowed us mount the PCB and screw on nuts and ballance the weight of the rotor.
+
+![The Arm PCB]()
+
+The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74LVC245 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
+
+All PCB's were designed using KiCad, an open source ECAD software. Project files are included in our GitHub Repo, linked in appendix B.
+
+## Mechanical
+
+
 
 Results of the design
 * *Any and all test data, scope traces, waveforms, etc*
@@ -88,10 +106,28 @@ Our results met our expectations close to perfectly. The one element that we wou
 
 ## Appendix A: Permissions
 
+The group approves this report for inclusion on the course website.
+
+The group approves the video for inclusion on the course youtube channel.
+
+# Appendix B: Source Code
+
+See a full source code listing at our [GitHub Repo](https://github.com/usedhondacivic/ECE-4760-final-project).
+
 ## Appendix B: Bill of Materials
 
 ## Appendix C: External Links and References
 
-### Software
-Source code: 
+Technical Documentation:
 
+* Data sheets
+  * APA102 LEDS
+  * Logic level converter
+  * Hall effect sensor
+  * PI PICO
+    * hardware design guide
+    * c sdk
+    * RP 2040 reference
+    * tcp schenanigans 
+
+Sources of Inspiration: 
