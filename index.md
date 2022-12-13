@@ -46,6 +46,16 @@ Results of the design
 * *how you enforced safety in the design.*
 * *usability by you and other people*
 
+**TODO test data images**
+
+In terms of time complexity, our constraint was maintaining high rotational resolution (LED changes per arm rotation) while operating the motor quickly enough to maintain the optical illusion of a continuous image. The time complexity of operating the display for a full rotation is proportional to the number of rotations * number of LEDs * 3 (3 is for RGB color). The three is for RGB color. We used 40 LEDs and found that 120 LED changes per rotation was sufficient for a high resolution image. Then we ran 14,400 color updates every arm rotation. Each update was a single byte SPI operation clocked at 20 MHz. Then, with no added delays, the arm could be operated at 0.72 ms per full rotation. This is significantly faster than necessary to maintain the persistance of vision illusion, so we were able to operate the display without flicker or hesitation. Additionally, the TCP interface for changing the display image was handled asynchronously on a separate core from the thread operating the display, so interaction did not cause timing issues.
+
+The images generated had a resolution of 40 LEDs by 120 angles, so 480 "pixels". This number could have been increased by changing the number of angles, but the actual resolution of the image is constrained by the size and number of the LEDs so changing this parameter would have diminishing returns. As is, even complex images such as a photograph of our professor are recognizable, and text is legible as well.
+
+**TODO safety**
+
+The POV display is easily usable. On the hardware side, the device has a single power supply originating from a wall outlet charger. It can be plugged in and ready to go anywhere. Then the motor speed is controlled by a potentiometer attached to its H-bridge power supply. FOr software, images can be communicated with an interactive Python script that accepts the name of any image in the folder labelled "pov_images" and communicates the processed image to the display. It also accepts several GIF names and automatically cycles through the images of the GIF to simulate movement.
+
 Conclusions
 * *Analyse your design in terms of how the results met your expectations. What might you do differently next time?*
 * *How did your design conform to the applicable standards?*
@@ -55,3 +65,5 @@ Conclusions
     * *Are you reverse-engineering a design? How did you deal with patent/trademark issues?*
     * *Did you have to sign non-disclosure to get a sample part?*
     * *Are there patent opportunites for your project?*
+
+Our results met our expectations close to perfectly. The one element that we would like to improve is the GIF speed, which could be accomplished by increasing the polling frequency of our TCP thread on the Pico W operating the display. Otherwise, we are satisfied with our clear and stable holographic images. 
