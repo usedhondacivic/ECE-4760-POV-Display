@@ -77,7 +77,21 @@ We were able to locate a much stronger motor in the lab, which ended up being be
 
 ## Mechanical
 
+We started the design process by working on the rotor. As mentioned in the previous section, the PCBs themselves were included in the mechanical construction of the rotor. To supplement the PCBs, we needed to create a super structure that holds the PCBs together and connects them to the motor shaft. Additionally, we needed a mount for the inductive coil. Along with the functional requirements, we want to keep weight to a minimum and make the design modular so that design iterations are faster.
 
+![The final rotor design]()
+
+Our design is 3D printed with minimal infill to reduce weight. It is only a couple of millimeters thick, and is designed to use the PCBs to supplement its strength. Components are connected using M3 screws that are threaded directly into the PLA. With proper print settings, these connections are remarkably strong, and more than strong enough for the mostly lateral load in this application.
+
+The rotor is connected to an adaptor that fits the motor shaft on one end and has a standard hole pattern on the other side. By making the adaptor a separate component, the entire rotor doesn't have to be reprinted when we change the motor. The adaptor includes a hole for a set screw, but the press fit ended up being sufficient. By adding a bolt and nuts to the hole at the end of the arm PCB, the rotor can be balanced. This reduces load on the motor and mitigates vibrations.
+
+The next step was creating a housing for the motor. The housing must include a way to secure the inductive coil at a proper distance from the rotor, secure the motor and minimize vibrations, and make it easy to attach the system to a table for testing.
+
+![The final motor mount design]()
+
+After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
+
+### Mechanical aside: Motor mistake
 
 Results of the design
 * *Any and all test data, scope traces, waveforms, etc*
