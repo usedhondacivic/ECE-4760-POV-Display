@@ -55,6 +55,10 @@ The APA102 LEDs use a two wire SPI protocol to communicate with the PI Pico. Thi
 
 ![The communication protocol from the APA102 data sheet]()
 
+Below is our code for constructing the packets based on a three dimensional array representing the color of each LED on the strip.
+
+**add code**
+
 The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so ,the entire strip can be updated from a single message sent to the first LED in the strip.
 
 ### Pico Entry Point
@@ -99,7 +103,15 @@ The next step was creating a housing for the motor. The housing must include a w
 
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
 
-### Mechanical aside: Motor mistake
+### Mechanical aside: Motor mistakes
+
+One of our early designs used a series of belts to increase the speed of a 300 rpm motor up to 1800. This design repeatedly failed due to the 3D printed shafts shearing, so we ended up looking for a faster motor instead.
+
+![CAD of the belted gearbox design]()
+
+We initially tried using a much smaller motor, but scrapped it due to overheating. This design used a significantly different motor mount, which screwed into the back of the inductive coil mount.
+
+![CAD of the old motor mount]()
 
 Results of the design
 * *Any and all test data, scope traces, waveforms, etc*
@@ -144,13 +156,13 @@ The group approves this report for inclusion on the course website.
 
 The group approves the video for inclusion on the course youtube channel.
 
-# Appendix B: Source Code
+## Appendix B: Source Code
 
 See a full source code listing at our [GitHub Repo](https://github.com/usedhondacivic/ECE-4760-final-project).
 
-## Appendix B: Bill of Materials
+## Appendix C: Bill of Materials
 
-## Appendix C: External Links and References
+## Appendix D: External Links and References
 
 Technical Documentation:
 
