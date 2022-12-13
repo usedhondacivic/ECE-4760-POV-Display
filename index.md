@@ -2,9 +2,11 @@ A persistence of vision display constructed from scratch using the Raspberry Pi 
 
 Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.edu), Rabail Makhdoom (rm857@cornell.edu)
 
-![Three examples of the POV Display running](https://github.com/usedhondacivic/ECE-4760-final-project/blob/09e4d72bde516a27118cdfb5415e74ec57157b85/photos/POV_banner.png?raw=true)
+![Three examples of the POV Display running](./assets/images/POV_banner.png)
 
 Project Introduction (*One sentence "sound bite" that describes your project. A summary of what you did and why.*)
+
+# Project Introduction
 
 We built a persistance of vision display which can simulate any image with a rotating strip of LEDs.
 
@@ -18,6 +20,8 @@ High level design
 * *logical structure*
 * *hardware/software tradeoffs*
 * *Discuss existing patents, copyrights, and trademarks which are relevant toyour project.*
+
+# High Level Design
 
 The original idea for this project came from a video that Rabail saw of a similar POV display on Youtube.com. We approached our professor, Hunter Adams, to discuss whether this would actually be a viable project idea and on his confirmation we started brainstorming about the POV display. Initially, we thought of implementing the display on a propeller fan as we had seen on Youtube, but eventually we chose to build the rotor and arm of the POV display ourselves for a cleaner and more lightweight project. 
 
@@ -35,9 +39,15 @@ Program/hardware design
 * *Be sure to specifically reference any design or code you used from someone else.*
 * *Things you tried which did not work*
 
-The main components of our mechanical design are a motor, a spinning arm with 2 PCBs attached, and two 3D printed mounts for the motor as well as for the spinning arm which were designed and 3D printed. The mount acts as the main support for the arm as it is connected to the spinning shaft of the motor. Since the motor did not have its own self-supporting component, we also built a mount to ensure that it stays upright. This mount provides great stability while the motor is spinning at high speeds and as an additional precaution, we also clamped the main mounting bracket to a table during the demonstration. Furthermore, to ensure that we don't get too much swaying in the arm itself at the high speeds we were testing at, we positioned the electrical components on the spinning arm to provide good counterbalance on both sides and used nuts to balance the weights on both sides.
+# Design
+
+## Software
 
 Our program had several steps. First, we developed a Python script to converted bitmap images into a custom, polar coordinate data format which could be used to display images on the POV display. Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation. The main challenge in the program for displaying the image was in timing. The thread to change the LEDs had to run exactly as quickly as needed to loop through the entire image during one spin of the blade. This was accomplished by timing one rotational period using a hall effect sensor and magnet. A hall effect sensor attached to the spinning microcontroller would trigger an interrupt every time it passed a magnet fastened to a stationary base. By timing the interrupts and dividing by the target number of rotations, the timing of LED changes could be adjusted on the fly to guarantee a complete and steady image.
+
+## Hardware
+
+The main components of our mechanical design are a motor, a spinning arm with 2 PCBs attached, and two 3D printed mounts for the motor as well as for the spinning arm which were designed and 3D printed. The mount acts as the main support for the arm as it is connected to the spinning shaft of the motor. Since the motor did not have its own self-supporting component, we also built a mount to ensure that it stays upright. This mount provides great stability while the motor is spinning at high speeds and as an additional precaution, we also clamped the main mounting bracket to a table during the demonstration. Furthermore, to ensure that we don't get too much swaying in the arm itself at the high speeds we were testing at, we positioned the electrical components on the spinning arm to provide good counterbalance on both sides and used nuts to balance the weights on both sides.
 
 Results of the design
 * *Any and all test data, scope traces, waveforms, etc*
@@ -46,11 +56,15 @@ Results of the design
 * *how you enforced safety in the design.*
 * *usability by you and other people*
 
+# Results of the Design
+
 **TODO test data images**
 
 In terms of time complexity, our constraint was maintaining high rotational resolution (LED changes per arm rotation) while operating the motor quickly enough to maintain the optical illusion of a continuous image. The time complexity of operating the display for a full rotation is proportional to the number of rotations * number of LEDs * 3 (3 is for RGB color). The three is for RGB color. We used 40 LEDs and found that 120 LED changes per rotation was sufficient for a high resolution image. Then we ran 14,400 color updates every arm rotation. Each update was a single byte SPI operation clocked at 20 MHz. Then, with no added delays, the arm could be operated at 0.72 ms per full rotation. This is significantly faster than necessary to maintain the persistance of vision illusion, so we were able to operate the display without flicker or hesitation. Additionally, the TCP interface for changing the display image was handled asynchronously on a separate core from the thread operating the display, so interaction did not cause timing issues.
 
 The images generated had a resolution of 40 LEDs by 120 angles, so 480 "pixels". This number could have been increased by changing the number of angles, but the actual resolution of the image is constrained by the size and number of the LEDs so changing this parameter would have diminishing returns. As is, even complex images such as a photograph of our professor are recognizable, and text is legible as well.
+
+## Safety
 
 **TODO safety**
 
@@ -66,4 +80,18 @@ Conclusions
     * *Did you have to sign non-disclosure to get a sample part?*
     * *Are there patent opportunites for your project?*
 
-Our results met our expectations close to perfectly. The one element that we would like to improve is the GIF speed, which could be accomplished by increasing the polling frequency of our TCP thread on the Pico W operating the display. Otherwise, we are satisfied with our clear and stable holographic images. 
+# Conclusions
+
+Our results met our expectations close to perfectly. The one element that we would like to improve is the GIF speed, which could be accomplished by increasing the polling frequency of our TCP thread on the Pico W operating the display. Otherwise, we are satisfied with our clear and stable holographic images.
+
+# Appendicies
+
+## Appendix A: Permissions
+
+## Appendix B: Bill of Materials
+
+## Appendix C: External Links and References
+
+### Software
+Source code: 
+
