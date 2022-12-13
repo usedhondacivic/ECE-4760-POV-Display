@@ -37,9 +37,7 @@ Our program had several steps. First, we developed a Python script to converted 
 
 **TODO: FILL THIS IN**
 
-### Device Drivers
-
-#### APA102 LEDs
+### APA102 LEDs
 
 The APA102 LEDs use a two wire SPI protocol to communicate with the PI Pico. This allows us to use RP2040's SPI peripheral, which made writing the driver easy. The LEDs expect packets that are broken into "frames" of 32 bits. Each message begins with a start frame of 32 0's, and end with an end frame of 32 1's. In between, each frame represents the data for a single LED in the strip. A LED frame starts with 111, then is followed by five bits representing the brightness of the LED. This is followed by 8 bits for each of blue, green, and red, giving 256 values for each.
 
@@ -82,7 +80,7 @@ Below is our code for constructing the packets based on a three dimensional arra
 
 The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so ,the entire strip can be updated from a single message sent to the first LED in the strip.
 
-#### Hall Effect Sensor
+### Hall Effect Sensor
 
 The hall effect sensor we chose is active low, meaning it pulls a GPIO pin to ground whenever the south poll of a magnet gets close to it. We set up a falling edge interrupt on the pin, triggering whenever the sensor moves past the stationary magnet on the motor mount. Below is the code inside of the interrupt:
 
@@ -101,6 +99,7 @@ When the interrupt is triggered, the period of rotation is calculated by subtrac
 ### Pico TCP Client
 
 Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation.
+
 **TODO: MORE DETAIL / CODE**
 
 ### Pico Entry Point
@@ -244,6 +243,12 @@ Although we consider the system a huge success, there are a couple of areas that
 The first is video playback. We had a stretch goal of enabling full video playback, or at least GIF playback. We achieved GIF playback at a reduced speed, but would like to increase this capability substantially.
 
 The second is pixel density. Although our display has higher pixel density that most comparable projects, there are noticeable gaps between the pixels. This could be remedied by using two staggered rows of LEDs, with a slight radial overlap.
+
+## Special Thanks
+
+Special thanks to Professor Hunter Adams and Professor Bruce Land for making this class something to remember.
+
+![Our display showing a picture of Hunter and Bruce]()
 
 # Appendices
 
