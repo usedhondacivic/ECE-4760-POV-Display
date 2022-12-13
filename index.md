@@ -53,11 +53,42 @@ Our program had several steps. First, we developed a Python script to converted 
 
 The APA102 LEDs use a two wire SPI protocol to communicate with the PI Pico. This allows us to use RP2040's SPI peripheral, which made writing the driver easy. The LEDs expect packets that are broken into "frames" of 32 bits. Each message begins with a start frame of 32 0's, and end with an end frame of 32 1's. In between, each frame represents the data for a single LED in the strip. A LED frame starts with 111, then is followed by five bits representing the brightness of the LED. This is followed by 8 bits for each of blue, green, and red, giving 256 values for each.
 
-![The communication protocol from the APA102 data sheet]()
+![The communication protocol from the APA102 data sheet](/assets/images/apa102_protocol.png)
 
 Below is our code for constructing the packets based on a three dimensional array representing the color of each LED on the strip.
 
-**add code**
+    void apa102_write_strip(uint8_t (*color_data)[3], uint16_t num_leds)
+    {
+        uint8_t spi_buffer[num_leds * 4 + 8];
+        // Start frame
+        spi_buffer[0] = 0x00;
+        spi_buffer[1] = 0x00;
+        spi_buffer[2] = 0x00;
+        spi_buffer[3] = 0x00;
+        // LED frames
+        for (int i = 0; i < num_leds; i++)
+        {
+            if (i < 5) // Inner most LEDs move slower, so appear brighter. Lower their brightness
+            {
+                spi_buffer[i * 4 + 4] = 0b11100001; // Not full brightness so I don't kill my retinas
+            }
+            else
+            {
+                spi_buffer[i * 4 + 4] = 0b11100011; // Not full brightness so I don't kill my retinas
+            }
+            // APA102's we have are RBG instead of RGB,so flip the BG inputs here.
+            spi_buffer[i * 4 + 5] = color_data[i][0];
+            spi_buffer[i * 4 + 6] = color_data[i][2];
+            spi_buffer[i * 4 + 7] = color_data[i][1];
+        }
+        // End frame
+        spi_buffer[num_leds * 4 + 4] = 0xFF;
+        spi_buffer[num_leds * 4 + 5] = 0xFF;
+        spi_buffer[num_leds * 4 + 6] = 0xFF;
+        spi_buffer[num_leds * 4 + 7] = 0xFF;
+
+        spi_write_blocking(SPI_PORT, spi_buffer, num_leds * 4 + 8);
+    }
 
 The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so ,the entire strip can be updated from a single message sent to the first LED in the strip.
 
@@ -65,7 +96,7 @@ The LEDs are wired in series, with the SCK and MOSI lines of the previous LED le
 
 ## Electrical
 
-In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are king. Made from high strength PTFE substrate, these boards can stand many thousands of G's, and soldered connections are extremely resilient to the characteristic forces of a POV display. They are also light weight and slightly flexible, making them even more suitable for our use case. We decided to create two PCB's for our design.
+In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are king. Made from high strength PTFE substrate, these boards can stand many thousands of G's, and soldered connections are extremely resilient to the characteristic forces of a POV display. They are also light weight and slightly flexible, making them perfect for our use case. We decided to create two PCB's for our design.
 
 The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED's and provides standard 0.1 inch headers for interfacing with the LEDs. We added a M3 sided hole on each end of the arm, which allowed us mount the PCB and screw on nuts and ballance the weight of the rotor. The APA102 LEDs were chosen because they use a two wire SPI protocol to communicate with the control board. This allows communication rates of up to 20 MHz, more than fast enough for our application. We previously experimented with the popular WS2812B LEDs, but these LEDs capped at around 1 KHz refresh rate. This would limit the radial resolution of our display.
 
@@ -103,7 +134,7 @@ The next step was creating a housing for the motor. The housing must include a w
 
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
 
-### Mechanical aside: Motor mistakes
+### Aside: Motor mistakes
 
 One of our early designs used a series of belts to increase the speed of a 300 rpm motor up to 1800. This design repeatedly failed due to the 3D printed shafts shearing, so we ended up looking for a faster motor instead.
 
@@ -128,11 +159,13 @@ In terms of time complexity, our constraint was maintaining high rotational reso
 
 The images generated had a resolution of 40 LEDs by 120 angles, so 480 "pixels". This number could have been increased by changing the number of angles, but the actual resolution of the image is constrained by the size and number of the LEDs so changing this parameter would have diminishing returns. As is, even complex images such as a photograph of our professor are recognizable, and text is legible as well.
 
+The POV display is easily usable. On the hardware side, the device has a single power supply originating from a wall outlet charger. It can be plugged in and ready to go anywhere. Then the motor speed is controlled by a potentiometer attached to its H-bridge power supply. FOr software, images can be communicated with an interactive Python script that accepts the name of any image in the folder labelled "pov_images" and communicates the processed image to the display. It also accepts several GIF names and automatically cycles through the images of the GIF to simulate movement.
+
 ## Safety
 
-**TODO safety**
+Given the speeds that our display rotates at, safety was a major concern. A 13 inch arm rotating 30 times a second has a tip speed of well over 100 mph, and a component flying off could injure someone. Ultimately, any project of this variety comes with some degree of risk. It is our job as engineers to ensure the risk is within an acceptable range. We achieved this through careful design and testing.
 
-The POV display is easily usable. On the hardware side, the device has a single power supply originating from a wall outlet charger. It can be plugged in and ready to go anywhere. Then the motor speed is controlled by a potentiometer attached to its H-bridge power supply. FOr software, images can be communicated with an interactive Python script that accepts the name of any image in the folder labelled "pov_images" and communicates the processed image to the display. It also accepts several GIF names and automatically cycles through the images of the GIF to simulate movement.
+To lower risk we complied with all known good practices for designing high acceleration devices. By ensuring that all connections and components were able to resist much greater forces than our system generated, we brought the chance of malfunction close to zero. In case we failed to consider some variable, we conducted many test spin ups using safety glasses and in areas where no students were in the line of fire. Only once we had confirmed that the system was robust did we begin testing without safety glasses. We continued to check the system for loose components before activating the motor, and never ran the motor when the system was damaged.
 
 Conclusions
 * *Analyse your design in terms of how the results met your expectations. What might you do differently next time?*
