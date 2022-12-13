@@ -4,8 +4,6 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 ![Three examples of the POV Display running](./assets/images/POV_banner.png)
 
-Project Introduction (*One sentence "sound bite" that describes your project. A summary of what you did and why.*)
-
 # Project Introduction
 
 We built a persistance of vision display which can create any image with a rotating strip of LEDs.
@@ -13,13 +11,6 @@ We built a persistance of vision display which can create any image with a rotat
 A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can trasnmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
 
 The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 light emitting diodes (LEDs) as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W tranmit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
-
-High level design
-* *Rationale and sources of your project idea*
-* *background math*
-* *logical structure*
-* *hardware/software tradeoffs*
-* *Discuss existing patents, copyrights, and trademarks which are relevant toyour project.*
 
 # High Level Design
 
@@ -33,19 +24,19 @@ The nature of our design allows the hardware and software tradeoffs to be indepe
 
 Our project does not include any known existing patents, copyrights, or trademarks. We designed all the hardware from scratch. The software is also our original work, with some basis in the open-source example code published by Raspberry Pi.
 
-Program/hardware design
-* *program details. What parts were tricky to write?*
-* *hardware details. Could someone else build this based on what you have written?*
-* *Be sure to specifically reference any design or code you used from someone else.*
-* *Things you tried which did not work*
-
 # Design Details
 
 ## Software
 
 Our program had several steps. First, we developed a Python script to converted bitmap images into a custom, polar coordinate data format which could be used to display images on the POV display. Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation. The main challenge in the program for displaying the image was in timing. The thread to change the LEDs had to run exactly as quickly as needed to loop through the entire image during one spin of the blade. This was accomplished by timing one rotational period using a hall effect sensor and magnet. A hall effect sensor attached to the spinning microcontroller would trigger an interrupt every time it passed a magnet fastened to a stationary base. By timing the interrupts and dividing by the target number of rotations, the timing of LED changes could be adjusted on the fly to guarantee a complete and steady image.
 
-### Python
+### Python Image Preprocessing
+
+**TODO: FILL THIS IN**
+
+### Python TCP Server
+
+**TODO: FILL THIS IN**
 
 ### Device Drivers
 
@@ -92,7 +83,69 @@ Below is our code for constructing the packets based on a three dimensional arra
 
 The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so ,the entire strip can be updated from a single message sent to the first LED in the strip.
 
+#### Hall Effect Sensor
+
+The hall effect sensor we chose is active low, meaning it pulls a GPIO pin to ground whenever the south poll of a magnet gets close to it. We set up a falling edge interrupt on the pin, triggering whenever the sensor moves past the stationary magnet on the motor mount. Below is the code inside of the interrupt:
+
+    detect_time = time_us_32();
+
+    if (detect_time - old_time > 10000)
+    {
+        time_period = detect_time - old_time;
+
+        old_time = detect_time;
+        curr_rot = 0;
+    }
+
+When the interrupt is triggered, the period of rotation is calculated by subtracting the last activation from the current time. We also check that the period is a reasonable value (> 10000 us), which helps us reject any high frequency false positives. Finally, we indicate the we have hit our zero point by setting the relevant variable. This stops the display from becoming misaligned relative to the external reference frame.
+
+### Pico TCP Client
+
+**TODO: FILL THIS IN**
+
 ### Pico Entry Point
+
+The main Pico code uses all of the micro-controller code above to create the final product.
+
+In the core 0 main function, we begin by initializing relevant GPIO, setting up the pin change interrupt for the hall effect sensor, and overclocking the RP2040 to 250 MHz. We also call the initialization functions for our APA102 driver and write a simple pattern to the strip to indicate that the system has powered on. Next we initialize the TCP client and use it to connect to wifi. Finally, we start a protothread to handle TCP communication and start core 1.
+
+Core 1 main is fairly simple, as we just start a protothread for writing the current image to the LEDs.
+
+By using both cores of the RP2040, we can concurrently receive TCP messages and control the LED strip, allowing for seamless operation.
+
+The TCP thread is simple, and is shown below. We simply check for new messages, and if they have arrived we update the LED array. The inner workings of run_tcp_client_test() are detailed above.
+
+    PT_BEGIN(pt);
+    while (1)
+    {
+        if (run_tcp_client_test() == -1)
+        {
+            printf("FAILED\n");
+            PT_YIELD_usec(100000);
+        }
+        printf("TCP ");
+        PT_YIELD_usec(1000000);
+    }
+    PT_END(pt);
+
+In our LED timing thread, we cut a full rotation into slices based on the estimated period from the hall effect sensor. We can then use PT_YIELD_usec to wait until the LEDs need to be written again, and do so.
+
+    // Mark beginning of thread
+    PT_BEGIN(pt);
+    volatile static int begin_time;
+    volatile static int spare_time;
+    while (1)
+    {
+        // Measure time at start of thread
+        begin_time = time_us_32();
+        apa102_write_strip(led_array[curr_rot % ROTATIONS], LED_NUM);
+        curr_rot++;
+        unsigned int theta_time = time_period / ROTATIONS;
+        spare_time = theta_time - (time_us_32() - begin_time);
+
+        PT_YIELD_usec(spare_time);
+    }
+    PT_END(pt);
 
 ## Electrical
 
@@ -144,13 +197,6 @@ We initially tried using a much smaller motor, but scrapped it due to overheatin
 
 ![CAD of the old motor mount]()
 
-Results of the design
-* *Any and all test data, scope traces, waveforms, etc*
-* *speed of execution (hesitation, filcker, interactiveness, concurrency)*
-* *accuracy (numeric, music frequencies, video signal timing, etc)*
-* *how you enforced safety in the design.*
-* *usability by you and other people*
-
 # Results of the Design
 
 **TODO test data images**
@@ -166,16 +212,6 @@ The POV display is easily usable. On the hardware side, the device has a single 
 Given the speeds that our display rotates at, safety was a major concern. A 13 inch arm rotating 30 times a second has a tip speed of well over 100 mph, and a component flying off could injure someone. Ultimately, any project of this variety comes with some degree of risk. It is our job as engineers to ensure the risk is within an acceptable range. We achieved this through careful design and testing.
 
 To lower risk we complied with all known good practices for designing high acceleration devices. By ensuring that all connections and components were able to resist much greater forces than our system generated, we brought the chance of malfunction close to zero. In case we failed to consider some variable, we conducted many test spin ups using safety glasses and in areas where no students were in the line of fire. Only once we had confirmed that the system was robust did we begin testing without safety glasses. We continued to check the system for loose components before activating the motor, and never ran the motor when the system was damaged.
-
-Conclusions
-* *Analyse your design in terms of how the results met your expectations. What might you do differently next time?*
-* *How did your design conform to the applicable standards?*
-* *Intellectual property considerations.*
-    * *Did you reuse code or someone else's design? Did you use any of Altera's IP?*
-    * *Did you use code in the public domain?*
-    * *Are you reverse-engineering a design? How did you deal with patent/trademark issues?*
-    * *Did you have to sign non-disclosure to get a sample part?*
-    * *Are there patent opportunites for your project?*
 
 # Conclusions
 
