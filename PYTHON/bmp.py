@@ -3,7 +3,8 @@ import pandas as pd
 from PIL import Image
 from matplotlib import pyplot as plt
 
-path = "C:/Users/horwi/Downloads/red3.bmp"
+path = "./pov_images/color_wheel.bmp"
+
 # img = np.array(Image.open(path))
 # print('\n\n', img.shape)
 
@@ -20,8 +21,8 @@ def bmp_to_rad(path, num_pix, res):
     # print(ret.shape)
     return ret, xs, ys
 
-def display_bmp(path, num_pix):
-    rad, x, y = bmp_to_rad(path, 50, 180)
+def display_bmp():
+    rad, x, y = bmp_to_rad(path, 40, 50)
 
     color_rad = rad / 255
 
@@ -38,6 +39,5 @@ def display_bmp(path, num_pix):
 
     plt.scatter(y, -x, c=cs)
     plt.show()
-
 
 # display_bmp()

@@ -69,7 +69,7 @@ def send_data(name, debug=False):
     elif name == 'bird':
         arrs = []
         for i in range(10):
-            path = f"C:/Users/horwi/git/ECE-4760-final-project/PYTHON/pov_images/bird/frame-0{i}-delay-005s.bmp"
+            path = f"./pov_images/bird/frame-0{i}-delay-005s.bmp"
             rot_arr, _, _ = bmp.bmp_to_rad(path, LED_NUM, args.r)
             arrs.append(rot_arr)
         for _ in range(0,4,2):
@@ -83,7 +83,7 @@ def send_data(name, debug=False):
     elif name == 'flower':
         arrs = []
         for i in range(7):
-            path = f"C:/Users/horwi/git/ECE-4760-final-project/PYTHON/pov_images/flower/{i}.bmp"
+            path = f"./pov_images/flower/{i}.bmp"
             rot_arr, _, _ = bmp.bmp_to_rad(path, LED_NUM, args.r)
             arrs.append(rot_arr)
         for _ in range(4):
