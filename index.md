@@ -40,7 +40,7 @@ Below are some graphs showing what the processed images look look at varying rad
 
 ### Python TCP Server
 
-The image data is sent to the Pico through a TCP socket using the Python socket library. To do this, the full array is divided up into packets consisting of the data for two orientations of the arm. Each packet is flattened and converted into a byte array, then sent to the Pico W. Below is the TCP server function given a preprocessed image array.
+The image data is sent to the Pico through a Transmission Control Protocol (TCP) socket using the Python socket library. To do this, the full array is divided up into packets consisting of the data for two orientations of the arm. Each packet is flattened and converted into a byte array, then sent to the Pico W. We chose to use a TCP protocol as it is reliable and accurate. It works by establishing a connection with the client via a 3-way handshake process. We then send packets to the client over TCP and each packet is acknowledged before the next one is sent. Below is the TCP server function given a preprocessed image array.
 
     def send_arr(rot_arr, debug=False):
         # Open socket to the server
