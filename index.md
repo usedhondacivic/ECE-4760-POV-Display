@@ -8,9 +8,9 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 We built a persistance of vision display which can create any image with a rotating strip of LEDs.
 
-A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can trasnmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
+A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can transmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
 
-The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 light emitting diodes (LEDs) as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W tranmit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
+The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 light emitting diodes (LEDs) as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W transit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
 
 # High Level Design
 
@@ -78,7 +78,7 @@ Below is our code for constructing the packets based on a three dimensional arra
         spi_write_blocking(SPI_PORT, spi_buffer, num_leds * 4 + 8);
     }
 
-The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so ,the entire strip can be updated from a single message sent to the first LED in the strip.
+The LEDs are wired in series, with the SCK and MOSI lines of the previous LED leading into the next. When an LED receives a packet, it updates its state, strips the first LED frame off the packet, and then shifts the new packet out of its output SCK and MOSI lines. By doing so the entire strip can be updated from a single message sent to the first LED in the strip.
 
 ### Hall Effect Sensor
 
@@ -147,6 +147,8 @@ In our LED timing thread, we cut a full rotation into slices based on the estima
     PT_END(pt);
 
 ## Electrical
+![Our PCBs layed out in KiCad](/assets/images/PCB_layout.png)
+*Our PCBs layed out in KiCad*
 
 In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are king. Made from high strength PTFE substrate, these boards can stand many thousands of G's, and soldered connections are extremely resilient to the characteristic forces of a POV display. They are also light weight and slightly flexible, making them perfect for our use case. We decided to create two PCB's for our design.
 
@@ -157,6 +159,10 @@ The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED
 The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74LVC245 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
 
 ![The Control Board PCB]()
+*The assembled control board PCB*
+
+![The Control Board Schematic](/assets/images/control_board_schematic.png)
+*The control board's schematic*
 
 All PCB's were designed using KiCad, an open source ECAD software. Project files are included in our GitHub Repo, linked in appendix B.
 
@@ -175,6 +181,10 @@ We were able to locate a much stronger motor in the lab, which ended up being be
 We started the design process by working on the rotor. As mentioned in the previous section, the PCBs themselves were included in the mechanical construction of the rotor. To supplement the PCBs, we needed to create a super structure that holds the PCBs together and connects them to the motor shaft. Additionally, we needed a mount for the inductive coil. Along with the functional requirements, we want to keep weight to a minimum and make the design modular so that design iterations are faster.
 
 ![The final rotor design]()
+*Final rotor design in CAD*
+
+![The final rotor design]()
+*Final rotor design in real life*
 
 Our design is 3D printed with minimal infill to reduce weight. It is only a couple of millimeters thick, and is designed to use the PCBs to supplement its strength. Components are connected using M3 screws that are threaded directly into the PLA. With proper print settings, these connections are remarkably strong, and more than strong enough for the mostly lateral load in this application.
 
@@ -183,6 +193,10 @@ The rotor is connected to an adaptor that fits the motor shaft on one end and ha
 The next step was creating a housing for the motor. The housing must include a way to secure the inductive coil at a proper distance from the rotor, secure the motor and minimize vibrations, and make it easy to attach the system to a table for testing.
 
 ![The final motor mount design]()
+*Final motor mount design in CAD*
+
+![The final motor mount design]()
+*Final motor mount design in real life*
 
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
 
@@ -191,10 +205,12 @@ After many tests and iterations, we landed on the motor mount design above. The 
 One of our early designs used a series of belts to increase the speed of a 300 rpm motor up to 1800. This design repeatedly failed due to the 3D printed shafts shearing, so we ended up looking for a faster motor instead.
 
 ![CAD of the belted gearbox design]()
+*Failed belted gearbox design*
 
 We initially tried using a much smaller motor, but scrapped it due to overheating. This design used a significantly different motor mount, which screwed into the back of the inductive coil mount.
 
 ![CAD of the old motor mount]()
+*Old motor mount*
 
 # Results of the Design
 
@@ -249,6 +265,7 @@ The second is pixel density. Although our display has higher pixel density that 
 Special thanks to Professor Hunter Adams and Professor Bruce Land for making this class something to remember.
 
 ![Our display showing a picture of Hunter and Bruce]()
+*Hunter (Left) and Bruce (Right) displayed on our project*
 
 # Appendices
 
@@ -301,16 +318,15 @@ Assortment of M3 bolts and nuts
 Technical Documentation:
 
 * Data sheets
-  * APA102 LEDS
-  * Logic level converter
-  * Hall effect sensor
+  * [APA102 LEDS]()
+  * [Logic level converter]()
+  * [Hall effect sensor]()
   * PI PICO
-    * hardware design guide
-    * c sdk
-    * RP 2040 reference
-    * Example code
-    * 
-* TCP Example Code
-* Protothreads Library
+    * [hardware design guide]()
+    * [c sdk]()
+    * [RP 2040 reference]()
+    * [Example code]()
+* [TCP Example Code]()
+* [Protothreads Library]()
 
 Sources of Inspiration: 
