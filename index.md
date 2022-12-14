@@ -202,7 +202,7 @@ The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED
 
 ![The Arm PCB]()
 
-The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74LVC245 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
+The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74AHCT125 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
 
 ![The Control Board PCB]()
 *The assembled control board PCB*
@@ -326,17 +326,13 @@ See a full source code listing at our [GitHub Repo](https://github.com/usedhonda
 
 ## Appendix C: Bill of Materials
 
-[Raspberry Pi Pico W x1]()
+[Raspberry Pi Pico W x1](https://www.sparkfun.com/products/20173)
 
-[APA102 LEDs x40]()
+[APA102 LEDs x40](https://www.adafruit.com/product/2343)
 
-[74LVC245 Logic Level shifter]()
+[74AHCT125 Logic Level shifter](https://www.adafruit.com/product/1787?gclid=Cj0KCQiA4uCcBhDdARIsAH5jyUkxVKdOHXmEXnZC9aqroJtVOS5VTfUSgVTmgmaAUKQjI0jcVy9jLdMaAoASEALw_wcB)
 
-[Hall Effect Sensor]()
-
-[Raspberry Pi Pico W x1]()
-
-[Raspberry Pi Pico W x1]()
+[Hall Effect Sensor](https://www.adafruit.com/product/158)
 
 Misc. components:
 
@@ -358,20 +354,21 @@ Various 0.1" headers / jumpers
 
 Assortment of M3 bolts and nuts
 
+Small magnets
+
 ## Appendix D: External Links and References
 
 Technical Documentation:
 
 * Data sheets
-  * [APA102 LEDS]()
-  * [Logic level converter]()
-  * [Hall effect sensor]()
+  * [APA102 LEDS](https://cdn-shop.adafruit.com/product-files/2343/SK9822_SHIJI.pdf)
+  * [Logic level converter](https://cdn-shop.adafruit.com/product-files/1787/1787AHC125.pdf)
+  * [Hall effect sensor](https://cdn-shop.adafruit.com/datasheets/US5881_rev007.pdf)
   * PI PICO
-    * [hardware design guide]()
-    * [c sdk]()
-    * [RP 2040 reference]()
-    * [Example code]()
-* [TCP Example Code]()
-* [Protothreads Library]()
-
-Sources of Inspiration: 
+    * [Pico datasheet](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf)
+    * [hardware design guide](https://datasheets.raspberrypi.com/rp2040/hardware-design-with-rp2040.pdf)
+    * [c sdk](https://datasheets.raspberrypi.com/pico/raspberry-pi-pico-c-sdk.pdf)
+    * [RP 2040 reference](https://datasheets.raspberrypi.com/rp2040/rp2040-datasheet.pdf)
+    * [Example code](https://github.com/raspberrypi/pico-examples)
+* [TCP Example Code](https://github.com/raspberrypi/pico-examples/tree/master/pico_w/tcp_client)
+* [Protothreads Library](http://dunkels.com/adam/pt/)
