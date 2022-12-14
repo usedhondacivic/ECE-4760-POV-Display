@@ -208,7 +208,7 @@ One of our early designs used a series of belts to increase the speed of a 300 r
 
 We initially tried using a much smaller motor, but scrapped it due to overheating. This design used a significantly different motor mount, which screwed into the back of the inductive coil mount.
 
-![CAD of the old motor mount]()
+![CAD of the old motor mount](/assets/images/old_motor_mount.png)
 *Old motor mount*
 
 # Results of the Design
