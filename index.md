@@ -263,6 +263,38 @@ See a full source code listing at our [GitHub Repo](https://github.com/usedhonda
 
 ## Appendix C: Bill of Materials
 
+[Raspberry Pi Pico W x1]()
+
+[APA102 LEDs x40]()
+
+[74LVC245 Logic Level shifter]()
+
+[Hall Effect Sensor]()
+
+[Raspberry Pi Pico W x1]()
+
+[Raspberry Pi Pico W x1]()
+
+Misc. components:
+
+1x Arm PCB (see github repo)
+
+1x Control PCB (see github repo)
+
+3D printed components (see github repo)
+
+1x 3A Diode
+
+1x 47 uF Capacitor
+
+1x 10 kOhm Capacitor
+
+Various 0.1" headers / jumpers
+
+1x Motor (Ours was salvaged, look for something in the range of 1800 rpm @ 18 W)
+
+Assortment of M3 bolts and nuts
+
 ## Appendix D: External Links and References
 
 Technical Documentation:
@@ -275,6 +307,9 @@ Technical Documentation:
     * hardware design guide
     * c sdk
     * RP 2040 reference
-    * tcp schenanigans 
+    * Example code
+    * 
+* TCP Example Code
+* Protothreads Library
 
 Sources of Inspiration: 
