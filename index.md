@@ -1,24 +1,22 @@
-A persistence of vision display constructed from scratch using the Raspberry Pi Pico W microcontroller. Runs at 30 FPS with full RGB color and streams images over wifi.
-
 Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.edu), Rabail Makhdoom (rm857@cornell.edu)
 
-![Three examples of the POV Display running](./assets/images/POV_banner.png)
+![Three examples of the POV Display running](./assets/images/POV_banner-min.png)
 
 # Project Introduction
 
-We built a persistance of vision display which can create any image with a rotating strip of LEDs.
+Our project is a persistence of vision display constructed from scratch using the Raspberry Pi Pico W microcontroller. Runs at 30 FPS with full RGB color and streams images over wifi.
 
-A persistence of vision (POV) refers to the phenomenon of the human eye in which an image exists for a brief time (10 ms). It is an optical illusion in which a visual image seems to persist even when the light from it ceases to enter our eyes. Our POV display exploits this phenomena by spinning a one dimensional row of 40 LED's at such a high frequency that a two dimensional display is visible. By ensuring that the rotational speed of the LED's is fast enough, we can transmit images over Wifi and display them on our system such that the human eye perceives a complete two dimensional image. 
+Persistence of Vision refers to the eyes ability to see images for a brief time after they disappear. Our display exploits this phenomena by using a quickly rotating LED strip to "paint" light onto the air. This creates the illusion of holographic images floating in mid air. These images are ghostly, beautiful, and mesmerizing, perfect for advertising, art installations, or product presentations.
 
-The overall design of this project can be grouped into three categories: mechanical, electrical, and software design. A spinning arm consisting of 40 light emitting diodes (LEDs) as well as a mounting station for the motor and PCBs make up the mechanical components. On the electrical end, we used multiple components: an H-bridge motor driver and Pi Pico was used to run the motor, a Pico W transit images to our system, a hall sensor detected the time period of each arm rotation, and an inductive supply powered up all the required components. The actual algorithm to send images over Wifi using TCP and to display them on the LEDs was implemented in C and Python.
+Using 40 independently addressable LEDs, we were able to create the illusion of 4800 pixels at over 30 fps. The display is 26" in diameter, and updates over wifi from our custom python client.
 
 # High Level Design
 
-The original idea for this project came from a video that Rabail saw of a similar POV display on Youtube.com. We approached our professor, Hunter Adams, to discuss whether this would actually be a viable project idea and on his confirmation we started brainstorming about the POV display. Initially, we thought of implementing the display on a propeller fan as we had seen on Youtube, but eventually we chose to build the rotor and arm of the POV display ourselves for a cleaner and more lightweight project. 
+The original idea for this project came from a video that Rabail saw of a similar POV display on Youtube.com. We approached our professor, Hunter Adams, to discuss whether the viability of the project, and after his confirmation we started brainstorming ideas Initially, we thought of implementing the display on a propeller fan as we had seen on Youtube, but eventually we chose to build the rotor and arm of the POV display ourselves for a cleaner and more lightweight project. 
 
-To display an image, we first convert a bitmap image to a polar coordinate system, where we define a theoretical "pixel" to be the image's color at a certain radius from the center of the image at a certain angle. The resolution of the image in this system is determined by the number of LEDs we can use (radius) and how many times we can change the LEDs in one rotation (angle). 
+To display an image, we first convert a bitmap image to a polar coordinate system, where we define a theoretical "pixel" to be the image's color at a certain radius from the center of the image at a certain angle. The resolution of the image in this system is determined by the number of LEDs we can use along its radius and how many times we can change the LEDs in one rotation. 
 
-The logical structure of our project is relatively straightforward. First, we  Our software calculates the time duration to display each "pixel" on the display by simply measuring the period of each full rotation using a Hall Effect sensor and a magnet, then dividing by the number of rotation angles we sampled from the source image. By assigning the LEDs to a certain color for just that duration of time, we can then display the pixels and ensure proper image orientation at each rotation.
+The logical structure of our project is relatively straightforward. First, our software calculates the time duration to display each "pixel" on the display by simply measuring the period of each full rotation using a Hall Effect sensor and a magnet, then dividing by the number of rotation angles we sampled from the source image. By assigning the LEDs to a certain color for just that duration of time, we can then display the pixels and ensure proper image orientation at each rotation.
 
 The nature of our design allows the hardware and software tradeoffs to be independent of each other. The more robust we make our software (i.e. optimized code, error-free LED mapping), the more optimized and error free our project becomes. Similarly, by making our hardware more robust (i.e. using heat sinks, tying down wires, using bigger motors), we get a higher resolution of our system and also make the project safer. 
 
@@ -34,68 +32,68 @@ Our program had several steps. First, we developed a Python script to converted 
 
 Below are some graphs showing what the processed images look look at varying radial resolutions.
 
-![Rainbow dog at 60 changes / rotation](/assets/images/dog_180.png)
+![Rainbow dog at 60 changes / rotation](/assets/images/dog_180-min.png)
 
-![Rainbow dog at 90 changes / rotation](/assets/images/dog_90.png)
+![Rainbow dog at 90 changes / rotation](/assets/images/dog_90-min.png)
 
-![Rainbow dog at 180 changes / rotation](/assets/images/dog_60.png)
+![Rainbow dog at 180 changes / rotation](/assets/images/dog_60-min.png)
 
 ### Python TCP Server
 
 The image data is sent to the Pico through a TCP socket using the Python socket library. To do this, the full array is divided up into packets consisting of the data for two orientations of the arm. Each packet is flattened and converted into a byte array, then sent to the Pico W. Below is the TCP server function given a preprocessed image array.
 
-def send_arr(rot_arr, debug=False):
-    # Open socket to the server
-    sock = socket.socket()
-    addr = ('0.0.0.0', SERVER_PORT)
-    sock.bind(addr)
-    sock.listen(1)
-    print('server listening on', addr)
+    def send_arr(rot_arr, debug=False):
+        # Open socket to the server
+        sock = socket.socket()
+        addr = ('0.0.0.0', SERVER_PORT)
+        sock.bind(addr)
+        sock.listen(1)
+        print('server listening on', addr)
 
-    # Wait for the client
-    con = None
-    con, addr = sock.accept()
-    print('client connected from', addr)
+        # Wait for the client
+        con = None
+        con, addr = sock.accept()
+        print('client connected from', addr)
 
 
-    total_bytes = 0
+        total_bytes = 0
 
-    # repeat test for a number of iterations
-    for i in range(PACKET_NUM):
+        # repeat test for a number of iterations
+        for i in range(PACKET_NUM):
 
-        # Take RPB rotations from image
-        curr_data = rot_arr[RPB*i : RPB*i+RPB][:][:]
-        write_buf = bytearray(curr_data.flatten())
-        if debug:
-            print(len(curr_data.flatten()))
-            print(len(write_buf))
-            prstr = ""
-            for i, b in enumerate(write_buf):
-                if i % 3 == 0: prstr += 'r: ' + str(int(b)) + ' '
-                if i % 3 == 1: prstr += 'g: ' + str(int(b)) + ' '
-                if i % 3 == 2: prstr += 'b: ' + str(int(b)) + '\n'
-            print(prstr)
-        # write BUF_SIZE bytes to the client
-        write_len = con.send(write_buf)
-        print('Wrote %d bytes to client' % write_len)
-        total_bytes += write_len
+            # Take RPB rotations from image
+            curr_data = rot_arr[RPB*i : RPB*i+RPB][:][:]
+            write_buf = bytearray(curr_data.flatten())
+            if debug:
+                print(len(curr_data.flatten()))
+                print(len(write_buf))
+                prstr = ""
+                for i, b in enumerate(write_buf):
+                    if i % 3 == 0: prstr += 'r: ' + str(int(b)) + ' '
+                    if i % 3 == 1: prstr += 'g: ' + str(int(b)) + ' '
+                    if i % 3 == 2: prstr += 'b: ' + str(int(b)) + '\n'
+                print(prstr)
+            # write BUF_SIZE bytes to the client
+            write_len = con.send(write_buf)
+            print('Wrote %d bytes to client' % write_len)
+            total_bytes += write_len
 
-        # Check size of data written
-        if write_len != BUF_SIZE:
-            raise RuntimeError('wrong amount of data written')
+            # Check size of data written
+            if write_len != BUF_SIZE:
+                raise RuntimeError('wrong amount of data written')
 
-    # All done
-    con.close()
-    sock.close()
+        # All done
+        con.close()
+        sock.close()
 
-    print(f"In total wrote {total_bytes} bytes")
-    print("send completed")
+        print(f"In total wrote {total_bytes} bytes")
+        print("send completed")
 
 ### APA102 LEDs
 
 The APA102 LEDs use a two wire SPI protocol to communicate with the PI Pico. This allows us to use RP2040's SPI peripheral, which made writing the driver easy. The LEDs expect packets that are broken into "frames" of 32 bits. Each message begins with a start frame of 32 0's, and end with an end frame of 32 1's. In between, each frame represents the data for a single LED in the strip. A LED frame starts with 111, then is followed by five bits representing the brightness of the LED. This is followed by 8 bits for each of blue, green, and red, giving 256 values for each.
 
-![The communication protocol from the APA102 data sheet](/assets/images/apa102_protocol.png)
+![The communication protocol from the APA102 data sheet](/assets/images/apa102_protocol-min.png)
 
 Below is our code for constructing the packets based on a three dimensional array representing the color of each LED on the strip.
 
@@ -201,22 +199,22 @@ In our LED timing thread, we cut a full rotation into slices based on the estima
     PT_END(pt);
 
 ## Electrical
-![Our PCBs layed out in KiCad](/assets/images/PCB_layout.png)
+![Our PCBs layed out in KiCad](/assets/images/PCB_layout-min.png)
 *Our PCBs layed out in KiCad*
 
 In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are king. Made from high strength PTFE substrate, these boards can stand many thousands of G's, and soldered connections are extremely resilient to the characteristic forces of a POV display. They are also light weight and slightly flexible, making them perfect for our use case. We decided to create two PCB's for our design.
 
 The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED's and provides standard 0.1 inch headers for interfacing with the LEDs. We added a M3 sided hole on each end of the arm, which allowed us mount the PCB and screw on nuts and ballance the weight of the rotor. The APA102 LEDs were chosen because they use a two wire SPI protocol to communicate with the control board. This allows communication rates of up to 20 MHz, more than fast enough for our application. We previously experimented with the popular WS2812B LEDs, but these LEDs capped at around 1 KHz refresh rate. This would limit the radial resolution of our display.
 
-![The arm lit up](/assets/images/full_lit_up.png)
+![The arm lit up](/assets/images/full_lit_up-min.png)
 *The arm PCB assembled and lit up*
 
 The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74AHCT125 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
 
-![The Control Board PCB](/assets/images/control_board.png)
+![The Control Board PCB](/assets/images/control_board-min.png)
 *The assembled control board PCB*
 
-![The Control Board Schematic](/assets/images/control_board_schematic.png)
+![The Control Board Schematic](/assets/images/control_board_schematic-min.png)
 *The control board's schematic*
 
 All PCB's were designed using KiCad, an open source ECAD software. Project files are included in our GitHub Repo, linked in appendix B.
@@ -225,7 +223,7 @@ One of the key design choices of a POV display is how to power the rotor. Becaus
 
 Due to the adoption of wireless charging technology in mobile phones, high efficiency and inductive coils are readily available an amazon. We picked up a 25$ system that is capable of transmitting 2A of current at 5v across up to 80 mm, more than enough for our application.
 
-![Inductive coil mounted on bottom of arm](/assets/images/arm_coil.png)
+![Inductive coil mounted on bottom of arm](/assets/images/arm_coil-min.png)
 *One of the inductive coils mounted on the bottom of the arm*
 
 Finally, we need to spin the rotor. We initially used cheap and small brushed DC motors. You are probably familiar with these motors, they are the small gray ones that come with about every hobby electronics kit ever made. Because we took care to ballance our rotor and minimize its weight, we predicted that the motor would have very low load. We thought this meant we could get away with a wimpy motor without issues. We were unfortunately wrong, for reasons that aren't entirely clear. Our motors would overheat and burn up, which drawing only about 2A of current. We theorize that this was caused either by air resistance generating a much higher load than we predicted or from an interaction with the inductive power supply. The motor was positioned directly in the center of the inductive coil, and may have induced current in the motor coils that decreased performance.
@@ -236,11 +234,11 @@ We were able to locate a much stronger motor in the lab, which ended up being be
 
 We started the design process by working on the rotor. As mentioned in the previous section, the PCBs themselves were included in the mechanical construction of the rotor. To supplement the PCBs, we needed to create a super structure that holds the PCBs together and connects them to the motor shaft. Additionally, we needed a mount for the inductive coil. Along with the functional requirements, we want to keep weight to a minimum and make the design modular so that design iterations are faster.
 
-![The final rotor front](/assets/images/rotor_front.png)
-![The final rotor back](/assets/images/rotor_back.png)
+![The final rotor front](/assets/images/rotor_front-min.png)
+![The final rotor back](/assets/images/rotor_back-min.png)
 *Final rotor design in CAD*
 
-![The rotor fully assembled](/assets/images/full_arm_assembled.png)
+![The rotor fully assembled](/assets/images/full_arm_assembled-min.png)
 *The rotor fully assembled*
 
 Our design is 3D printed with minimal infill to reduce weight. It is only a couple of millimeters thick, and is designed to use the PCBs to supplement its strength. Components are connected using M3 screws that are threaded directly into the PLA. With proper print settings, these connections are remarkably strong, and more than strong enough for the mostly lateral load in this application.
@@ -249,30 +247,30 @@ The rotor is connected to an adaptor that fits the motor shaft on one end and ha
 
 The next step was creating a housing for the motor. The housing must include a way to secure the inductive coil at a proper distance from the rotor, secure the motor and minimize vibrations, and make it easy to attach the system to a table for testing.
 
-![The final motor mount front](/assets/images/motor_mount_front.png)
-![The final motor mount back](/assets/images/motor_mount_back.png)
+![The final motor mount front](/assets/images/motor_mount_front-min.png)
+![The final motor mount back](/assets/images/motor_mount_back-min.png)
 *Final motor mount design in CAD*
 
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
 
-![Full system in real life](/assets/images/full_midswing.png)
+![Full system in real life](/assets/images/full_midswing-min.png)
 *The full system mid swing*
 
 ### Aside: Motor mistakes
 
 One of our early designs used a series of belts to increase the speed of a 300 rpm motor up to 1800. This design repeatedly failed due to the 3D printed shafts shearing, so we ended up looking for a faster motor instead.
 
-![CAD of the belted gearbox design](/assets/images/gear_box.png)
+![CAD of the belted gearbox design](/assets/images/gear_box-min.png)
 *Failed belted gearbox design*
 
 We initially tried using a much smaller motor, but scrapped it due to overheating. This design used a significantly different motor mount, which screwed into the back of the inductive coil mount.
 
-![CAD of the old motor mount](/assets/images/old_motor_mount.png)
+![CAD of the old motor mount](/assets/images/old_motor_mount-min.png)
 *Old motor mount*
 
 # Results of the Design
 
-**TODO test data images**
+![Splash of images on the display](/assets/images/final_splash-min.png)
 
 We can quantify the performance of our display in terms of several metrics:
 
@@ -318,7 +316,7 @@ The second is pixel density. Although our display has higher pixel density that 
 
 Special thanks to Professor Hunter Adams and Professor Bruce Land for making this class something to remember.
 
-![Our display showing a picture of Hunter and Bruce](/assets/images/hunter_bruce.png)
+![Our display showing a picture of Hunter and Bruce](/assets/images/hunter_bruce-min.png)
 *Hunter (Left) and Bruce (Right) displayed the POV display*
 
 # Appendices
