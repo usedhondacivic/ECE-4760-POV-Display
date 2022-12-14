@@ -4,7 +4,7 @@ Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.ed
 
 # Project Introduction
 
-Our project is a persistence of vision display constructed from scratch using the Raspberry Pi Pico W microcontroller. Runs at 30 FPS with full RGB color and streams images over wifi.
+Our project is a persistence of vision display constructed from scratch using the Raspberry Pi Pico W microcontroller. It runs at 30 FPS with full RGB color and streams images over wifi.
 
 Persistence of Vision refers to the eyes' ability to see images for a brief time after they disappear. Our display exploits this phenomenon by using a quickly rotating LED strip to "paint" light onto the air. This creates the illusion of holographic images floating in mid-air. These images are ghostly, beautiful, and mesmerizing, perfect for advertising, art installations, or product presentations.
 
