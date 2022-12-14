@@ -180,11 +180,9 @@ We were able to locate a much stronger motor in the lab, which ended up being be
 
 We started the design process by working on the rotor. As mentioned in the previous section, the PCBs themselves were included in the mechanical construction of the rotor. To supplement the PCBs, we needed to create a super structure that holds the PCBs together and connects them to the motor shaft. Additionally, we needed a mount for the inductive coil. Along with the functional requirements, we want to keep weight to a minimum and make the design modular so that design iterations are faster.
 
-![The final rotor design]()
+![The final rotor front](/assets/images/rotor_front.png)
+![The final rotor back](/assets/images/rotor_back.png)
 *Final rotor design in CAD*
-
-![The final rotor design]()
-*Final rotor design in real life*
 
 Our design is 3D printed with minimal infill to reduce weight. It is only a couple of millimeters thick, and is designed to use the PCBs to supplement its strength. Components are connected using M3 screws that are threaded directly into the PLA. With proper print settings, these connections are remarkably strong, and more than strong enough for the mostly lateral load in this application.
 
@@ -192,19 +190,20 @@ The rotor is connected to an adaptor that fits the motor shaft on one end and ha
 
 The next step was creating a housing for the motor. The housing must include a way to secure the inductive coil at a proper distance from the rotor, secure the motor and minimize vibrations, and make it easy to attach the system to a table for testing.
 
-![The final motor mount design]()
+![The final motor mount front](/assets/images/motor_mount_front.png)
+![The final motor mount back](/assets/images/motor_mount_back.png)
 *Final motor mount design in CAD*
 
-![The final motor mount design]()
-*Final motor mount design in real life*
-
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
+
+![Full system in real life]()
+*Full assembled system*
 
 ### Aside: Motor mistakes
 
 One of our early designs used a series of belts to increase the speed of a 300 rpm motor up to 1800. This design repeatedly failed due to the 3D printed shafts shearing, so we ended up looking for a faster motor instead.
 
-![CAD of the belted gearbox design]()
+![CAD of the belted gearbox design](/assets/images/gear_box.png)
 *Failed belted gearbox design*
 
 We initially tried using a much smaller motor, but scrapped it due to overheating. This design used a significantly different motor mount, which screwed into the back of the inductive coil mount.
