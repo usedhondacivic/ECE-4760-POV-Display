@@ -208,11 +208,12 @@ In a system experiencing high accelerations, Printed Circuit Boards (PCB's) are 
 
 The first is what we call the "Arm". The arm holds 40 surface mounted APA102 LED's and provides standard 0.1 inch headers for interfacing with the LEDs. We added a M3 sided hole on each end of the arm, which allowed us mount the PCB and screw on nuts and ballance the weight of the rotor. The APA102 LEDs were chosen because they use a two wire SPI protocol to communicate with the control board. This allows communication rates of up to 20 MHz, more than fast enough for our application. We previously experimented with the popular WS2812B LEDs, but these LEDs capped at around 1 KHz refresh rate. This would limit the radial resolution of our display.
 
-![The Arm PCB]()
+![The arm lit up](/assets/images/full_lit_up.png)
+*The arm PCB assembled and lit up*
 
 The second PCB is the control board. The control board holds the Pico W and the power / logic electronics to facilitate communication with the LEDs and hall effect sensor. The Pico W uses 3.3v logic levels, which can cause trouble with the APA102 LEDs, which expect 5v logic. To remedy this we included a 74AHCT125 Logic Level shifter. This shifter converts our 3.3v signal to 5v, and is fast enough to deal with our high speed (20 MHz) SPI signals. To power the control board we use a screw terminal to accept power. A 47 uF decoupling capacitor is placed across the power supply, which is especially important when dealing with the rapidly changing power requirements of the LEDs. We also added a Schottky diode before routing the power into the Pico's VSYS pin. This diode allows the board to take power from other the screw terminals and the Pico's onboard USB without connecting 5v rails (which would damage both the Pico and the power supply). To allow for ease of programming we connected a push button between RUN and ground, allowing for the double tap into bootselect capability of the Pico to be reached. Finally, we wired the hall effect sensor to pin 21 of the Pico with a 10k pull up resistor. The sensor is active low.
 
-![The Control Board PCB]()
+![The Control Board PCB](/assets/images/control_board.png)
 *The assembled control board PCB*
 
 ![The Control Board Schematic](/assets/images/control_board_schematic.png)
@@ -224,7 +225,8 @@ One of the key design choices of a POV display is how to power the rotor. Becaus
 
 Due to the adoption of wireless charging technology in mobile phones, high efficiency and inductive coils are readily available an amazon. We picked up a 25$ system that is capable of transmitting 2A of current at 5v across up to 80 mm, more than enough for our application.
 
-![The inductive coils]()
+![Inductive coil mounted on bottom of arm](/assets/images/arm_coil.png)
+*One of the inductive coils mounted on the bottom of the arm*
 
 Finally, we need to spin the rotor. We initially used cheap and small brushed DC motors. You are probably familiar with these motors, they are the small gray ones that come with about every hobby electronics kit ever made. Because we took care to ballance our rotor and minimize its weight, we predicted that the motor would have very low load. We thought this meant we could get away with a wimpy motor without issues. We were unfortunately wrong, for reasons that aren't entirely clear. Our motors would overheat and burn up, which drawing only about 2A of current. We theorize that this was caused either by air resistance generating a much higher load than we predicted or from an interaction with the inductive power supply. The motor was positioned directly in the center of the inductive coil, and may have induced current in the motor coils that decreased performance.
 
@@ -238,6 +240,9 @@ We started the design process by working on the rotor. As mentioned in the previ
 ![The final rotor back](/assets/images/rotor_back.png)
 *Final rotor design in CAD*
 
+![The rotor fully assembled](/assets/images/full_arm_assembled.png)
+*The rotor fully assembled*
+
 Our design is 3D printed with minimal infill to reduce weight. It is only a couple of millimeters thick, and is designed to use the PCBs to supplement its strength. Components are connected using M3 screws that are threaded directly into the PLA. With proper print settings, these connections are remarkably strong, and more than strong enough for the mostly lateral load in this application.
 
 The rotor is connected to an adaptor that fits the motor shaft on one end and has a standard hole pattern on the other side. By making the adaptor a separate component, the entire rotor doesn't have to be reprinted when we change the motor. The adaptor includes a hole for a set screw, but the press fit ended up being sufficient. By adding a bolt and nuts to the hole at the end of the arm PCB, the rotor can be balanced. This reduces load on the motor and mitigates vibrations.
@@ -250,8 +255,8 @@ The next step was creating a housing for the motor. The housing must include a w
 
 After many tests and iterations, we landed on the motor mount design above. The motor and inductive coil are mounted together using the circular middle section. The cut out supports the motor and prevents it from rotating. The inductive coil is mounted in the indent, and the 13 mm of plastic facing the rotor guarantees the the minimum coil spacing is respected. The circular section then fits into the table mount, and is secured using two M3 screws. The current table mount provides flat area for clamping to the table, but the entire mount could be redesigned for a wall or floor mount. Again, the two parts are modular to reduce redesign time. All parts are printed in PLA with 20% infill, which was plenty strong enough for the application. PLA is not ferromagnetic, which means that it does not interfere with the inductive power supply.
 
-![Full system in real life]()
-*Full assembled system*
+![Full system in real life](/assets/images/full_midswing.png)
+*The full system mid swing*
 
 ### Aside: Motor mistakes
 
@@ -301,11 +306,7 @@ To lower risk we complied with all known good practices for designing high accel
 
 # Conclusions
 
-Our project proposal read:
-
-**TODO: FILL IN**
-
-Our final result achieved these goals with flying colors.
+Our goal was to create a visually stunning display that could produce holographic images and animations. We believe our final result achieved these goals with flying colors.
 
 Although we consider the system a huge success, there are a couple of areas that we think we could improve.
 
@@ -317,8 +318,8 @@ The second is pixel density. Although our display has higher pixel density that 
 
 Special thanks to Professor Hunter Adams and Professor Bruce Land for making this class something to remember.
 
-![Our display showing a picture of Hunter and Bruce]()
-*Hunter (Left) and Bruce (Right) displayed on our project*
+![Our display showing a picture of Hunter and Bruce](/assets/images/hunter_bruce.png)
+*Hunter (Left) and Bruce (Right) displayed the POV display*
 
 # Appendices
 
