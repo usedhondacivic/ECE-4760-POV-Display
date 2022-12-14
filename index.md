@@ -152,7 +152,32 @@ When the interrupt is triggered, the period of rotation is calculated by subtrac
 
 Then, we established a TCP exchange to transfer the processed image data to the microcontroller which operates the display. We based this code on the open-source TCP examples provided by Raspberry Pi for the Pico W. Wifi was our chosen communication method because it allowed us to update the image while the microcontroller was rotating, which would be impossible with a wired setup. On the microcontroller's side, we had one thread poll for incoming data and handle processing that data, while another thread maintained the display. The data came through as a stream of bytes but had to be formed into a three-dimensional array of color data: angle of rotation * LED number (0 at center) * RGB triple. This structure made displaying the image a simple continuous loop through the array, where all the LEDs are simultaneously updated at a period matching the frequency of the blade's rotation.
 
-**TODO: MORE DETAIL / CODE**
+This is our code for converting bytes from TCP into LED colors and rotation values.
+
+    static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot)
+    {
+        // unsigned int start_i = curr_rot * ROTATIONS * LED_NUM * 3;
+        static unsigned int arr_i = 0;
+        unsigned int led_i;
+        unsigned int rot_i;
+        unsigned char rgb_i;
+        uint8_t x;
+        // printf("dump_bytes %d\n", len);
+        for (unsigned int i = 0; i < len; i++)
+        {
+            x = bptr[i];
+            // arr_i = start_i + i;
+            rgb_i = arr_i % 3;
+            led_i = (arr_i / 3) % LED_NUM;
+            rot_i = (arr_i / (LED_NUM * 3)) % ROTATIONS;
+            led_array[rot_i][led_i][rgb_i] = x;
+            arr_i++;
+            // printf("Should be: %d, Got: %d | ", x, led_array[rot_i][led_i][rgb_i]);
+            // printf("rot: %d, led: %d, rgb: %d\n", rot_i, led_i, rgb_i);
+        }
+        // printf("\n");
+        return rot_i + 1;
+    }
 
 ### Pico Entry Point
 
