@@ -14,8 +14,8 @@ def display_file(file_loc):
     match file_type.lower():
         case "png" | "jpg" | "jpeg" | "bmp":
             data = file_translation.translate_image(file_loc)
-            # tcp_server.send_arr(data)
-            file_translation.visualize_data(data)
+            # file_translation.visualize_data(data)
+            tcp_server.send_arr(data, True)
         case "gif":
             pass
         case "mp4":
