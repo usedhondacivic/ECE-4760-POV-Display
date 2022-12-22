@@ -39,14 +39,15 @@ def send_arr(data, debug=False):
     flattened = getattr(flattened, "tolist", lambda: flattened)()
 
     flattened = bytearray(flattened)
-    print(len(flattened))
 
     conn.sendall(flattened)
+    print("Successfully sent image")
     ret_data = b''
     while True:
         ret_data = conn.recv(2)
         if len(ret_data) == 2:
             break
+    print("Display returned: ")
     print(ret_data)
 
 
