@@ -19,14 +19,13 @@
 
 #include "picow_tcp_client.h"
 
-#define WIFI_SSID "I14"
-#define WIFI_PASSWORD "horwitz3"
-#define TEST_TCP_SERVER_IP "172.20.10.2"
+// #define TEST_TCP_SERVER_IP "172.20.10.2"
+#define TEST_TCP_SERVER_IP "192.168.0.132"
 
 #define TCP_PORT 4242
 #define DEBUG_printf printf
 
-//#define LED_NUM 40
+// #define LED_NUM 40
 #define RPB 2
 #define PACKET_NUM (ROTATIONS / RPB)
 #define BUF_SIZE (LED_NUM * RPB * 3)

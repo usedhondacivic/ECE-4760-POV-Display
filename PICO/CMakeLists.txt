@@ -20,7 +20,8 @@ pico_generate_pio_header(main ${CMAKE_CURRENT_LIST_DIR}/drivers/ws2812/ws2812.pi
 
 target_sources(main PRIVATE main.c drivers/ws2812/ws2812.c utils/picow_tcp_client.c drivers/apa102/apa102.c)
 
-pico_enable_stdio_usb(main 1)
-pico_enable_stdio_uart(main 1)
-pico_add_extra_outputs(main)
 target_link_libraries(main pico_stdlib pico_divider pico_multicore hardware_pio hardware_irq hardware_clocks hardware_sync hardware_pwm hardware_adc hardware_spi hardware_pll pico_cyw43_arch_lwip_threadsafe_background pico_bootsel_via_double_reset)
+
+pico_enable_stdio_usb(main 1)
+pico_enable_stdio_uart(main 0)
+pico_add_extra_outputs(main)
