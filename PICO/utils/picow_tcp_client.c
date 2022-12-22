@@ -26,9 +26,7 @@
 #define DEBUG_printf printf
 
 // #define LED_NUM 40
-#define RPB 2
-#define PACKET_NUM (ROTATIONS / RPB)
-#define BUF_SIZE (LED_NUM * RPB * 3)
+#define BUF_SIZE (LED_NUM * 120 * 3)
 
 #define TEST_ITERATIONS 10
 #define POLL_TIME_S 5
@@ -45,13 +43,12 @@ typedef struct TCP_CLIENT_T_
     bool complete;
     int run_count;
     bool connected;
-    int curr_rot;
 } TCP_CLIENT_T;
 
-static int dump_bytes(const uint8_t *bptr, uint32_t len, int curr_rot)
+static unsigned int arr_i = 0;
+
+static int dump_bytes(const uint8_t *bptr, uint32_t len)
 {
-    // unsigned int start_i = curr_rot * ROTATIONS * LED_NUM * 3;
-    static unsigned int arr_i = 0;
     unsigned int led_i;
     unsigned int rot_i;
     unsigned char rgb_i;
@@ -177,26 +174,13 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     // can use this method to cause an assertion in debug mode, if this method is called when
     // cyw43_arch_lwip_begin IS needed
     cyw43_arch_lwip_check();
-    int rot;
-    state->curr_rot = 0;
     if (p->tot_len > 0)
     {
-        // DEBUG_printf("recv %d err %d\n", p->tot_len, err);
+        DEBUG_printf("recv %d err %d\n", p->tot_len, err);
         for (struct pbuf *q = p; q != NULL; q = q->next)
         {
-            rot = DUMP_BYTES(q->payload, q->len, state->curr_rot);
-            if (rot != state->curr_rot + RPB)
-                printf("Got wrong rotation increase: Should be: %d, got: %d\n", state->curr_rot + RPB, rot);
-            state->curr_rot += RPB;
+            DUMP_BYTES(q->payload, q->len);
         }
-        /*printf("PRINT FROM CLIENT");
-        for (int r = 0; r < ROTATIONS; r++)
-        {
-            for (int l = 0; l < LED_NUM; l++)
-            {
-                printf("ROT: %d, LED: %d, R: %d, G:%d, B: %d\n", r, l, led_array[r][l][0], led_array[r][l][1], led_array[r][l][2]);
-            }
-        }*/
         // Receive the buffer
         const uint16_t buffer_left = BUF_SIZE - state->buffer_len;
         state->buffer_len += pbuf_copy_partial(p, state->buffer + state->buffer_len,
@@ -205,23 +189,21 @@ err_t tcp_client_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err
     }
     pbuf_free(p);
 
-    state->run_count++;
-    printf("count: %d\n", state->run_count);
-    if (state->run_count >= PACKET_NUM)
-    {
-        tcp_result(arg, 0);
-        return ERR_OK;
-    }
-
     // If we have received the whole buffer, send it back to the server
-    // if (state->buffer_len == BUF_SIZE) {
-    //     DEBUG_printf("Writing %d bytes to server\n", state->buffer_len);
-    //     err_t err = tcp_write(tpcb, state->buffer, state->buffer_len, TCP_WRITE_FLAG_COPY);
-    //     if (err != ERR_OK) {
-    //         DEBUG_printf("Failed to write data %d\n", err);
-    //         return tcp_result(arg, -1);
-    //     }
-    // }
+    if (state->buffer_len == BUF_SIZE)
+    {
+        arr_i = 0;
+        uint8_t status_message[2] = {0b11111111, 0b11111111};
+        DEBUG_printf("Writing two byte status message to server\n");
+        err_t err = tcp_write(tpcb, status_message, 2, TCP_WRITE_FLAG_COPY);
+        state->buffer_len = 0;
+        state->sent_len = 0;
+        if (err != ERR_OK)
+        {
+            DEBUG_printf("Failed to write data %d\n", err);
+            return tcp_result(arg, -1);
+        }
+    }
     return ERR_OK;
 }
 
@@ -237,7 +219,7 @@ static bool tcp_client_open(void *arg)
     }
 
     tcp_arg(state->tcp_pcb, state);
-    tcp_poll(state->tcp_pcb, tcp_client_poll, POLL_TIME_S * 2);
+    // tcp_poll(state->tcp_pcb, tcp_client_poll, POLL_TIME_S * 2);
     tcp_sent(state->tcp_pcb, tcp_client_sent);
     tcp_recv(state->tcp_pcb, tcp_client_recv);
     tcp_err(state->tcp_pcb, tcp_client_err);
@@ -265,7 +247,6 @@ static TCP_CLIENT_T *tcp_client_init()
         return NULL;
     }
     ip4addr_aton(TEST_TCP_SERVER_IP, &state->remote_addr);
-    state->curr_rot = 0;
     return state;
 }
 
@@ -293,10 +274,10 @@ int run_tcp_client_test()
         // if you are not using pico_cyw43_arch_poll, then WiFI driver and lwIP work
         // is done via interrupt in the background. This sleep is just an example of some (blocking)
         // work you might be doing.
-        sleep_ms(1000);
+        sleep_ms(100);
 #endif
     }
-    // free(state);
+    free(state);
     return 0;
 }
 

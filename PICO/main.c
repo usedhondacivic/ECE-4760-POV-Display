@@ -99,7 +99,6 @@ static PT_THREAD(protothread_tcp(struct pt *pt))
         if (run_tcp_client_test() == -1)
         {
             printf("FAILED\n");
-            PT_YIELD_usec(100000);
         }
         printf("TCP ");
         PT_YIELD_usec(1000000);
@@ -112,7 +111,7 @@ void core1_main()
     // Add led timing thread
 
     pt_add_thread(protothread_timing);
-    //   Start the core 1 scheduler
+    // //   Start the core 1 scheduler
     pt_schedule_start;
 }
 
@@ -173,10 +172,15 @@ int main()
     multicore_launch_core1(&core1_main);
 
     // Listen for wifi updates
-    pt_add_thread(protothread_tcp);
+    // pt_add_thread(protothread_tcp);
 
-    // start core 0 scheduler
-    pt_schedule_start;
+    // // start core 0 scheduler
+    // pt_schedule_start;
+
+    if (run_tcp_client_test() == -1)
+    {
+        printf("FAILED\n");
+    }
 
     return 0;
 }
