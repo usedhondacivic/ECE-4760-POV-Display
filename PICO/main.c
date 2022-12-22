@@ -77,31 +77,7 @@ static PT_THREAD(protothread_timing(struct pt *pt))
         unsigned int theta_time = time_period / ROTATIONS;
         spare_time = theta_time - (time_us_32() - begin_time);
 
-        // if (spare_time < 0)
-        // {
-        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
-        // }
-        // else
-        // {
-        //     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
-        // }
-
         PT_YIELD_usec(spare_time);
-    }
-    PT_END(pt);
-}
-
-static PT_THREAD(protothread_tcp(struct pt *pt))
-{
-    PT_BEGIN(pt);
-    while (1)
-    {
-        if (run_tcp_client_test() == -1)
-        {
-            printf("FAILED\n");
-        }
-        printf("TCP ");
-        PT_YIELD_usec(1000000);
     }
     PT_END(pt);
 }
@@ -170,12 +146,6 @@ int main()
     // start core 1
     multicore_reset_core1();
     multicore_launch_core1(&core1_main);
-
-    // Listen for wifi updates
-    // pt_add_thread(protothread_tcp);
-
-    // // start core 0 scheduler
-    // pt_schedule_start;
 
     if (run_tcp_client_test() == -1)
     {
