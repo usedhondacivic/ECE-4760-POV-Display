@@ -25,9 +25,8 @@
 #include "./utils/picow_tcp_client.h"
 
 // WiFi Consts:
-#define WIFI_SSID "I14"
-#define WIFI_PASSWORD "horwitz3"
-#define TEST_TCP_SERVER_IP "172.20.10.2"
+#define WIFI_SSID "CenturyLink9790"
+#define WIFI_PASSWORD "e6baa5ee3c7f99"
 
 volatile static unsigned int detect_time;
 volatile static unsigned int old_time;
@@ -100,7 +99,6 @@ static PT_THREAD(protothread_tcp(struct pt *pt))
         if (run_tcp_client_test() == -1)
         {
             printf("FAILED\n");
-            PT_YIELD_usec(100000);
         }
         printf("TCP ");
         PT_YIELD_usec(1000000);
@@ -113,7 +111,7 @@ void core1_main()
     // Add led timing thread
 
     pt_add_thread(protothread_timing);
-    //   Start the core 1 scheduler
+    // //   Start the core 1 scheduler
     pt_schedule_start;
 }
 
@@ -137,12 +135,9 @@ int main()
     gpio_init(GPIO_PIN);
     gpio_set_dir(GPIO_PIN, 0);
     gpio_set_pulls(GPIO_PIN, true, false);
-    // printf("HELLO");
-    // gpio_set_irq_enabled(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1);
-    // gpio_set_irq_callback(gpio_callback1);
 
     gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_fall);
-    // gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
 
     if (cyw43_arch_init())
     {
@@ -151,7 +146,7 @@ int main()
     }
     cyw43_arch_enable_sta_mode();
 
-    // cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+    cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 
     printf("Connecting to WiFi...\n");
     if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000))
@@ -162,6 +157,7 @@ int main()
     else
     {
         printf("Connected.\n");
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
     }
     if (run_tcp_client_test() == -1)
     {
@@ -171,21 +167,20 @@ int main()
 
     // cyw43_arch_deinit();
 
-    // int i = 0;
-    // while (1)
-    // {
-    //     apa102_write_strip(led_array[i % 10], LED_NUM);
-    //     i++;
-    //     sleep_ms(100 / 5);
-    // }
-
     // start core 1
     multicore_reset_core1();
     multicore_launch_core1(&core1_main);
 
     // Listen for wifi updates
-    pt_add_thread(protothread_tcp);
+    // pt_add_thread(protothread_tcp);
 
-    // start core 0 scheduler
-    pt_schedule_start;
+    // // start core 0 scheduler
+    // pt_schedule_start;
+
+    if (run_tcp_client_test() == -1)
+    {
+        printf("FAILED\n");
+    }
+
+    return 0;
 }
