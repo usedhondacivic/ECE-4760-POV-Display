@@ -33,13 +33,21 @@ def init():
 
 
 def send_arr(data, debug=False):
-    conn.sendall(bytearray(data.flatten()))
+    flattened = data.flatten()
+    # This line is needed to convert numpy int32 to standard python int. Otherwise, bytearray produces four bytes per entry.
+    # See: https://stackoverflow.com/questions/9452775/converting-numpy-dtypes-to-native-python-types
+    flattened = getattr(flattened, "tolist", lambda: flattened)()
+
+    flattened = bytearray(flattened)
+    print(len(flattened))
+
+    conn.sendall(flattened)
     ret_data = b''
     while True:
-        ret_data += conn.recv(2)
+        ret_data = conn.recv(2)
         if len(ret_data) == 2:
             break
-    print(ret_data.decode())
+    print(ret_data)
 
 
 def close():
