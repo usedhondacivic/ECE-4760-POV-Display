@@ -13,8 +13,15 @@ numpy.set_printoptions(threshold=sys.maxsize)
 def translate_image(path):
     # Note: a ton of these operations can be done in slick numpy one liners, but I'm too dumb and want to be able to read my code
     # Also if I wanted stupid fast code I wouldn't be using python
-    img_array_raw = Image.open(path)
-    img_array_np = numpy.asarray(img_array_raw)
+
+    # open the image and resize it to make operations faster
+    img = Image.open(path)
+    width, height = img.size
+    max_dim = max(width, height)
+    new_size = (int((width / max_dim) * 600), int((height / max_dim) * 600))
+    img.resize(new_size)
+
+    img_array_np = numpy.asarray(img)
 
     width, height, channels = img_array_np.shape
 
@@ -96,5 +103,5 @@ def visualize_data(data):
 
 
 if __name__ == '__main__':
-    data = translate_image('./bird.png')
+    data = translate_image('./bear.bmp')
     visualize_data(data)

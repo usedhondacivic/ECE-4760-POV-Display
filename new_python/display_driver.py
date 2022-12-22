@@ -11,10 +11,11 @@ import tcp_server
 def display_file(file_loc):
     # RegEx to get the file type
     file_type = re.search(r'.*\.(.*)', file_loc).group(1)
-    match file_type:
+    match file_type.lower():
         case "png" | "jpg" | "jpeg" | "bmp":
             data = file_translation.translate_image(file_loc)
-            tcp_server.send_arr(data)
+            # tcp_server.send_arr(data)
+            file_translation.visualize_data(data)
         case "gif":
             pass
         case "mp4":

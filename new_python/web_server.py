@@ -76,6 +76,8 @@ def run(server_class=HTTPServer, handler_class=MyServer, port=8080):
 
 
 if __name__ == '__main__':
+    # Sent default start image
+    display_driver.display_file("./bear.bmp")
     from sys import argv
 
     if len(argv) == 2:
