@@ -9,6 +9,7 @@ from requests_toolbelt import MultipartDecoder
 import re
 
 import display_driver
+import tcp_server
 
 hostName = "localhost"
 serverPort = 8080
@@ -76,6 +77,9 @@ def run(server_class=HTTPServer, handler_class=MyServer, port=8080):
 
 
 if __name__ == '__main__':
+    # Init TCP connection
+    tcp_server.init()
+
     # Sent default start image
     display_driver.display_file("./bear.bmp")
     from sys import argv
