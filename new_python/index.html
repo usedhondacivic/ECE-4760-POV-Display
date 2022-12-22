@@ -2,14 +2,189 @@
 
 <head>
     <title>POV display</title>
+    <style>
+        html {
+            display: flex;
+            min-height: 100vh;
+            background-color: #141414;
+        }
 
+        body {
+            margin: auto;
+            font-family: 'Source Code Pro', monospace, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+                Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+            color: #fefff5;
+            display: flex;
+            flex-direction: row;
+            margin-top: 100px;
+        }
+
+        section {
+            min-width: 300px;
+            max-width: 600px;
+            padding-right: 100px;
+            padding-left: 100px;
+        }
+
+        form ol {
+            padding-left: 0;
+        }
+
+        form li,
+        div>p {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        section#current-disp img {
+            border-radius: 100%;
+            aspect-ratio: 1/1;
+            width: 100%;
+            object-fit: cover;
+            margin: 0px auto;
+        }
+
+        form img {
+            height: 64px;
+            order: 1;
+        }
+
+        form p {
+            line-height: 32px;
+            padding-left: 10px;
+        }
+
+        form label,
+        form button {
+            padding: 5px 10px;
+            border: 1px ridge #fefff5;
+            color: #fefff5;
+            font-size: 0.8rem;
+            height: auto;
+            background-color: transparent;
+        }
+
+        form label:hover,
+        form button:hover {
+            background-color: #2D5BA3;
+            color: white;
+        }
+
+        form label:active,
+        form button:active {
+            background-color: #0D3F8F;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
-    <form method="put">
-        <input type="file" id="myFile" name="filename">
-        <input type="submit">
-    </form>
+    <section id="form">
+        <h1>POV display</h1>
+        <form id="form_elm" method="post" enctype="multipart/form-data" target="hiddenFrame" onsubmit="formSubmit()">
+            <div>
+                <label for="image_uploads">Choose image to upload (PNG, JPG)</label>
+                <input type="file" id="image_uploads" name="image_uploads" accept=".jpg, .jpeg, .png" />
+            </div>
+            <div class="preview">
+                <p>No files currently selected for upload</p>
+            </div>
+            <div>
+                <button>Submit</button>
+            </div>
+        </form>
+        <p><em>Note: Images will get cropped in a circle around their center.</em></p>
+    </section>
+    <section id="current-disp">
+        <h2>Currently being displayed: </h2>
+        <img id="curr-prev" src="./bear.bmp">
+    </section>
+
+    <iframe name="hiddenFrame" width="0" height="0" border="0" style="display: none;"></iframe>
+
+    <script>
+        const input = document.querySelector('input');
+        const preview = document.querySelector('.preview');
+        const currentPrev = document.getElementById('curr-prev');
+        const form = document.getElementById('form_elm');
+
+        var new_url = null;
+
+        input.style.opacity = 0;
+
+        input.addEventListener('change', updateImageDisplay);
+
+        function updateImageDisplay() {
+            while (preview.firstChild) {
+                preview.removeChild(preview.firstChild);
+            }
+
+            const curFiles = input.files;
+            if (curFiles.length === 0) {
+                const para = document.createElement('p');
+                para.textContent = 'No files currently selected for upload';
+                preview.appendChild(para);
+            } else {
+                const list = document.createElement('ol');
+                preview.appendChild(list);
+
+                for (const file of curFiles) {
+                    const listItem = document.createElement('li');
+                    const para = document.createElement('p');
+
+                    if (validFileType(file)) {
+                        para.textContent = `File name ${file.name}, file size ${returnFileSize(file.size)}.`;
+                        const image = document.createElement('img');
+                        image.src = URL.createObjectURL(file);
+                        new_url = image.src;
+
+                        listItem.appendChild(image);
+                        listItem.appendChild(para);
+                    } else {
+                        para.textContent = `File name ${file.name}: Not a valid file type. Update your selection.`;
+                        listItem.appendChild(para);
+                    }
+
+                    list.appendChild(listItem);
+                }
+            }
+        }
+
+        function formSubmit() {
+            if (new_url != null) {
+                currentPrev.src = new_url;
+            }
+        }
+
+        // https://developer.mozilla.org/en-US/docs/Web/Media/Formats/Image_types
+        const fileTypes = [
+            'image/apng',
+            'image/bmp',
+            'image/gif',
+            'image/jpeg',
+            'image/pjpeg',
+            'image/png',
+            'image/svg+xml',
+            'image/tiff',
+            'image/webp',
+            `image/x-icon`
+        ];
+
+        function validFileType(file) {
+            return fileTypes.includes(file.type);
+        }
+
+        function returnFileSize(number) {
+            if (number < 1024) {
+                return number + 'bytes';
+            } else if (number > 1024 && number < 1048576) {
+                return (number / 1024).toFixed(1) + 'KB';
+            } else if (number > 1048576) {
+                return (number / 1048576).toFixed(1) + 'MB';
+            }
+        }
+    </script>
 </body>
 
 </html>
