@@ -135,11 +135,6 @@ int main()
         printf("Connected.\n");
         cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 0);
     }
-    if (run_tcp_client_test() == -1)
-    {
-        printf("FAILED\n");
-        return 1;
-    }
 
     // cyw43_arch_deinit();
 
@@ -147,9 +142,12 @@ int main()
     multicore_reset_core1();
     multicore_launch_core1(&core1_main);
 
-    if (run_tcp_client_test() == -1)
+    while (true)
     {
-        printf("FAILED\n");
+        if (run_tcp_client_test() == -1)
+        {
+            printf("FAILED\n");
+        }
     }
 
     return 0;
