@@ -40,11 +40,21 @@ def send_arr(data, debug=False):
 
     flattened = bytearray(flattened)
 
-    conn.sendall(flattened)
+    try:
+        conn.sendall(flattened)
+    except:
+        print("Lost connection. Waiting for new connection.")
+        init()
+
     print("Successfully sent image")
     ret_data = b''
     while True:
-        ret_data = conn.recv(2)
+        try:
+            ret_data = conn.recv(2)
+        except:
+            print("Lost connection. Waiting for new connection.")
+            init()
+            ret_data = conn.recv(2)
         if len(ret_data) == 2:
             break
     print("Display returned: ")
