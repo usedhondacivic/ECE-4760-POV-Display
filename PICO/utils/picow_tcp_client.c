@@ -23,7 +23,8 @@
 #define TEST_TCP_SERVER_IP "192.168.0.132"
 
 #define TCP_PORT 4242
-#define DEBUG_printf printf
+// #define DEBUG_printf printf
+#define DEBUG_printf(a, ...)
 
 // #define LED_NUM 40
 #define BUF_SIZE (LED_NUM * 120 * 3)
