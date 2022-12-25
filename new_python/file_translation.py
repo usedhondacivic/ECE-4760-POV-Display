@@ -1,4 +1,5 @@
-from PIL import Image
+from PIL import Image, ImageEnhance
+import PIL
 import sys
 import numpy
 from matplotlib import pyplot as plt
@@ -20,6 +21,8 @@ def translate_image(path):
     max_dim = max(width, height)
     new_size = (int((width / max_dim) * 600), int((height / max_dim) * 600))
     img.resize(new_size)
+    converter = ImageEnhance.Color(img)
+    img = converter.enhance(2.0)
 
     img_array_np = numpy.asarray(img)
 
@@ -42,13 +45,15 @@ def translate_image(path):
 
     rad_img = numpy.zeros((DIVISIONS_PER_ROTATION, NUM_LEDS, 3))
 
+    offset = numpy.pi * 0.85
+
     # Sample the image at each point that an LED will update at
     # We calculate this point in polar space, convert it to rectangular, then sample the image at that point
     # The results are stored in rad_img, which is a polar representation. Essentially (theta, r)
     for t in range(DIVISIONS_PER_ROTATION):
         for l in range(NUM_LEDS):
             # What angle are we looking at (in radians)
-            theta = t * ((2 * numpy.pi) / DIVISIONS_PER_ROTATION)
+            theta = t * ((2 * numpy.pi) / DIVISIONS_PER_ROTATION) + offset
             # How far out are we (from 0 to 1)
             r = l / NUM_LEDS
 
