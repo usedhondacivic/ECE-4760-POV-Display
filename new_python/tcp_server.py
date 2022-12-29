@@ -45,6 +45,7 @@ def send_arr(data, debug=False):
     except:
         print("Lost connection. Waiting for new connection.")
         init()
+        conn.sendall(flattened)
 
     print("Successfully sent image")
     ret_data = b''

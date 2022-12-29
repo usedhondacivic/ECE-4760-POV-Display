@@ -11,12 +11,17 @@ DIVISIONS_PER_ROTATION = 120
 numpy.set_printoptions(threshold=sys.maxsize)
 
 
-def translate_image(path):
+def translate_image_from_path(path):
+    data = Image.open(path)
+    return translate_image_from_data(data)
+
+
+def translate_image_from_data(data):
     # Note: a ton of these operations can be done in slick numpy one liners, but I'm too dumb and want to be able to read my code
     # Also if I wanted stupid fast code I wouldn't be using python
 
     # open the image and resize it to make operations faster
-    img = Image.open(path)
+    img = data
     width, height = img.size
     max_dim = max(width, height)
     new_size = (int((width / max_dim) * 600), int((height / max_dim) * 600))
