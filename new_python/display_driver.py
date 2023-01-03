@@ -25,18 +25,26 @@ def display_file(file_loc):
             gif = Image.open(file_loc)
             print("sending looping gif, with: " +
                   str(gif.n_frames) + " frames.")
+            data_arr = []
+            # preprocess frames
+            for i in range(gif.n_frames):
+                gif.seek(i)
+                frame = gif.convert("RGB")
+                data_arr.append(
+                    (file_translation.translate_image_from_data(
+                        frame), gif.info['duration']))
+            # send frames in same interval as the gif is encoded
             while True:
                 for i in range(gif.n_frames):
                     start_time = time.time()
-                    gif.seek(i)
-                    frame = gif.convert("RGB")
-                    data = file_translation.translate_image_from_data(frame)
-                    tcp_server.send_arr(data, True)
+                    tcp_server.send_arr(data_arr[i][0], True)
                     end_time = time.time()
                     d_t = end_time - start_time
-                    time_remaining = (1/30) - d_t
+                    time_remaining = data_arr[i][1] / 1000 - d_t
                     if time_remaining < 0:
-                        print("Missed 30 fps time")
+                        print("Missed frame timing | Intended: " + str(data_arr[i][1] / 1000) + " | Missed by: " +
+                              str(time_remaining) + " seconds.")
+                        continue
                     time.sleep(time_remaining)
 
         case "mp4":

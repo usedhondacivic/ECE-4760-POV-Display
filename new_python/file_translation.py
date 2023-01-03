@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 NUM_LEDS = 40
-DIVISIONS_PER_ROTATION = 120
+DIVISIONS_PER_ROTATION = 300
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
