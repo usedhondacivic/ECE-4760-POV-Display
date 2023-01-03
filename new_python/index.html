@@ -84,8 +84,9 @@
         <h1>POV display</h1>
         <form id="form_elm" method="post" enctype="multipart/form-data" target="hiddenFrame" onsubmit="formSubmit()">
             <div>
-                <label for="image_uploads">Choose image to upload (PNG, JPG)</label>
-                <input type="file" id="image_uploads" name="image_uploads" accept=".jpg, .jpeg, .png .bmp" />
+                <label for="image_uploads">Choose image to upload (PNG, JPG, PNG, BMP, GIF)</label>
+                <input type="file" id="image_uploads" name="image_uploads"
+                    accept=".jpg, .jpeg, .png, .bmp, .gif, .JPG, .JPEG, .PNG, .BMP, .GIF" />
             </div>
             <div class="preview">
                 <p>No files currently selected for upload</p>

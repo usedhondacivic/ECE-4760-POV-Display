@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 
 NUM_LEDS = 40
-DIVISIONS_PER_ROTATION = 120
+DIVISIONS_PER_ROTATION = 300
 
 numpy.set_printoptions(threshold=sys.maxsize)
 
@@ -113,5 +113,5 @@ def visualize_data(data):
 
 
 if __name__ == '__main__':
-    data = translate_image('./bear.bmp')
+    data = translate_image_from_path('./bear.bmp')
     visualize_data(data)
