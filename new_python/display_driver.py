@@ -18,6 +18,7 @@ def display_file(file_loc):
     match file_type.lower():
         case "png" | "jpg" | "jpeg" | "bmp":
             data = file_translation.translate_image_from_path(file_loc)
+            # Uncomment to see plotted representation of the data being sent
             # file_translation.visualize_data(data)
             tcp_server.send_arr(data, True)
         case "gif":

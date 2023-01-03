@@ -3,7 +3,7 @@ import numpy
 
 # Adapted from: https://realpython.com/python-sockets/#communication-breakdown
 
-# PROTOCOL
+# PROTOCOL (NOTE: Not yet implemented as such. Code below does not follow this contract, and display currently responds with 0xFFFF to all messages)
 # Server sends:
 # 4 Byte header - 2 byte meta info (1 byte for num rotations, 1 for brightness) - 2 byte Message size
 # x Byte body - decided by message size in header
