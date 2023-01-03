@@ -27,7 +27,7 @@
 #define DEBUG_printf(a, ...)
 
 // #define LED_NUM 40
-#define BUF_SIZE (LED_NUM * 120 * 3)
+#define BUF_SIZE (LED_NUM * ROTATIONS * 3)
 
 #define TEST_ITERATIONS 10
 #define POLL_TIME_S 5
@@ -275,7 +275,7 @@ int run_tcp_client_test()
         // if you are not using pico_cyw43_arch_poll, then WiFI driver and lwIP work
         // is done via interrupt in the background. This sleep is just an example of some (blocking)
         // work you might be doing.
-        sleep_ms(100);
+        sleep_ms(10);
 #endif
     }
     free(state);

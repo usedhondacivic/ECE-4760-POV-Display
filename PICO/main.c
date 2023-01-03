@@ -84,19 +84,15 @@ static PT_THREAD(protothread_timing(struct pt *pt))
 
 void core1_main()
 {
-    // Add led timing thread
-
-    pt_add_thread(protothread_timing);
-    // //   Start the core 1 scheduler
-    pt_schedule_start;
-}
-
-int main()
-{
     vreg_set_voltage(VREG_VOLTAGE_1_30);
     set_sys_clock_khz(250000, true);
 
-    stdio_init_all();
+    gpio_init(GPIO_PIN);
+    gpio_set_dir(GPIO_PIN, 0);
+    gpio_set_pulls(GPIO_PIN, true, false);
+
+    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_fall);
+    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
 
     apa102_init();
 
@@ -108,12 +104,15 @@ int main()
         {255, 0, 0}};
     apa102_write_strip(strip, LED_NUM);
 
-    gpio_init(GPIO_PIN);
-    gpio_set_dir(GPIO_PIN, 0);
-    gpio_set_pulls(GPIO_PIN, true, false);
+    // Add led timing thread
+    pt_add_thread(protothread_timing);
+    // //   Start the core 1 scheduler
+    pt_schedule_start;
+}
 
-    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_RISE, 1, gpio_fall);
-    gpio_set_irq_enabled_with_callback(GPIO_PIN, GPIO_IRQ_EDGE_FALL, 1, gpio_fall);
+int main()
+{
+    stdio_init_all();
 
     if (cyw43_arch_init())
     {
