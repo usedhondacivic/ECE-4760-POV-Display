@@ -113,5 +113,5 @@ def visualize_data(data):
 
 
 if __name__ == '__main__':
-    data = translate_image('./bear.bmp')
+    data = translate_image_from_path('./bear.bmp')
     visualize_data(data)
