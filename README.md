@@ -19,7 +19,7 @@ Project structure:
 	 - wifi.py
 		 - TCP server for sending image data
 - /new_python
-	- New experimental python setup, including a browser based interface and support for most image types, gif's, and mp4 video.
+	- New experimental python setup, including a browser based interface and support for most image types including gif's
 	- web_server.py
 		- Entry point for the program, launches the webserver which serves the web interface on localhost port 8080 (localhost:8080 in your web browser)
 	- tcp_server.py
