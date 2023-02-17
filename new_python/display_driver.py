@@ -7,7 +7,6 @@ import re
 import file_translation
 import tcp_server
 import time
-import cv2
 
 from PIL import Image
 
@@ -48,7 +47,6 @@ def display_file(file_loc):
                     time.sleep(time_remaining)
 
         case "mp4":
-            cap = cv2.VideoCapture(file_loc)
 
             pass
         case _:

@@ -1,0 +1,4 @@
+matplotlib==3.7.0
+numpy==1.24.2
+Pillow==9.4.0
+requests_toolbelt==0.10.1
