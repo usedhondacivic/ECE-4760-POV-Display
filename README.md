@@ -3,7 +3,7 @@ A persistence of vision display constructed from scratch using the Raspberry Pi 
 
 Created by: Michael Crum (mmc323@cornell.edu), Joseph Horwitz (jah569@cornell.edu), Rabail Makhdoom (rm857@cornell.edu)
 
-Read the write up: https://michael-crum.com/ECE-4760-final-project/
+Read the write up: https://michael-crum.com/pov_display/
 
 ![Three examples of the POV Display running](https://github.com/usedhondacivic/ECE-4760-final-project/blob/09e4d72bde516a27118cdfb5415e74ec57157b85/photos/POV_banner.png)
 
